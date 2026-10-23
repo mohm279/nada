@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>الأنشودة | نَدى</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared.js"></script>
+</head>
+
+<body>
+  <div id="app">جارٍ تحميل الأنشودة...</div>
+
+  <script>
+  (async () => {
+    let ctx = null;
+
+const { data: { session } } = await db.auth.getSession();
+
+if (session) {
+  ctx = await requireSession();
+}
+
+const id = new URLSearchParams(location.search).get('id');
+
+    if (!id) {
+      location.replace('library.html');
+      return;
+    }
+
+    const { data: n, error } = await db
+      .from('anasheed')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !n) {
+      document.getElementById('app').innerHTML =
+        styles() +
+        '<main class="wrap"><div class="empty">الأنشودة غير موجودة أو لا تملك صلاحية عرضها.</div><a class="btn" href="library.html">العودة للفهرس</a></main>';
+      return;
+    }
+
+const room = ctx ? selectedRoomId() : null;
+const isAdmin = ctx?.account?.role === 'admin';
+const isLeader = ctx?.account?.role === 'leader';
+
+    document.getElementById('app').innerHTML =
+      styles() +
+      commonHeader(n.title, ctx?.account || null) +
+      `
+      <p class="muted" id="category">${escapeHtml(n.category || 'بدون تصنيف')}</p>
+
+      <article id="lyrics" class="lyrics"></article>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn light" id="copy" type="button">نسخ الكلمات</button>
+
+        <a class="btn light" href="library.html${room ? '?room=' + encodeURIComponent(room) : ''}">
+          العودة للفهرس
+        </a>
+
+        ${isAdmin ? `
+          <button class="btn" id="edit" type="button">تعديل الأنشودة</button>
+          <button class="btn light" id="delete" type="button">حذف الأنشودة</button>
+        ` : ''}
+
+        ${(isLeader || isAdmin) && room ? `
+          <button class="btn" id="select" type="button">اعتماد الأنشودة للفرقة</button>
+        ` : ''}
+      </div>
+
+      ${isAdmin ? `
+        <section id="editBox" class="card" hidden style="margin-top:22px">
+          <h2>تعديل الأنشودة</h2>
+
+          <form id="editForm">
+            <label for="editTitle">عنوان الأنشودة</label>
+            <input id="editTitle" maxlength="250" required>
+
+            <label for="editCategory">التصنيف</label>
+            <input id="editCategory" maxlength="150">
+
+            <label for="editContent">كلمات الأنشودة</label>
+            <textarea id="editContent" required></textarea>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn" id="saveEdit" type="submit">حفظ التعديلات</button>
+              <button class="btn light" id="cancelEdit" type="button">إلغاء</button>
+            </div>
+          </form>
+        </section>
+      ` : ''}
+
+      </main>`;
+
+    document.getElementById('lyrics').textContent = n.content || '';
+
+    // نسخ الكلمات
+    document.getElementById('copy').onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(n.content || '');
+        toast('تم نسخ الكلمات');
+      } catch (e) {
+        console.error(e);
+        toast('تعذّر النسخ؛ انسخ النص يدويًا', true);
+      }
+    };
+
+    // وظائف المدير فقط
+    if (isAdmin) {
+      const editBox = document.getElementById('editBox');
+      const editForm = document.getElementById('editForm');
+
+      // فتح نموذج التعديل
+      document.getElementById('edit').onclick = () => {
+        document.getElementById('editTitle').value = n.title || '';
+        document.getElementById('editCategory').value = n.category || '';
+        document.getElementById('editContent').value = n.content || '';
+
+        editBox.hidden = false;
+        editBox.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      };
+
+      // إلغاء التعديل
+      document.getElementById('cancelEdit').onclick = () => {
+        editBox.hidden = true;
+        editForm.reset();
+      };
+
+      // حفظ التعديلات
+      editForm.onsubmit = async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById('saveEdit');
+        const title = document.getElementById('editTitle').value.trim();
+        const category = document.getElementById('editCategory').value.trim();
+        const content = document.getElementById('editContent').value.trim();
+
+        if (!title || !content) {
+          toast('العنوان والكلمات مطلوبان', true);
+          return;
+        }
+
+        btn.disabled = true;
+
+        try {
+          const { data, error } = await db
+            .from('anasheed')
+            .update({
+              title,
+              category: category || null,
+              content,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select('id');
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            throw new Error('لم يتم تحديث أي سجل؛ تحقق من صلاحيات التعديل في قاعدة البيانات.');
+          }
+
+          n.title = title;
+          n.category = category || null;
+          n.content = content;
+
+          const pageTitle = document.querySelector('.page-title h1');
+          if (pageTitle) pageTitle.textContent = title;
+
+          document.getElementById('category').textContent =
+            category || 'بدون تصنيف';
+
+          document.getElementById('lyrics').textContent = content;
+          document.title = title + ' | نَدى';
+
+          editBox.hidden = true;
+          toast('تم حفظ التعديلات بنجاح');
+        } catch (err) {
+          console.error('خطأ تعديل الأنشودة:', err);
+          toast('تعذّر التعديل؛ تحقق من صلاحيات المدير وسياسات قاعدة البيانات.', true);
+        } finally {
+          btn.disabled = false;
+        }
+      };
+
+      // حذف الأنشودة دون رسالة تأكيد
+      // يمنع حذف أنشودة معتمدة في أي غرفة
+      document.getElementById('delete').onclick = async () => {
+        const btn = document.getElementById('delete');
+        btn.disabled = true;
+
+        try {
+          const { data: active, error: activeError } = await db
+            .from('active_selections')
+            .select('room_id')
+            .eq('nasheed_id', id);
+
+          if (activeError) throw activeError;
+
+          if (active && active.length > 0) {
+            toast(
+              'لا يمكن حذف الأنشودة لأنها معتمدة في غرفة أو أكثر. ألغِ اعتمادها أولًا.',
+              true
+            );
+            return;
+          }
+
+          const { data: deleted, error: deleteError } = await db
+            .from('anasheed')
+            .delete()
+            .eq('id', id)
+            .select('id');
+
+          if (deleteError) throw deleteError;
+
+          if (!deleted || deleted.length === 0) {
+            throw new Error('لم يتم حذف أي سجل. تحقق من سياسة DELETE وصلاحيات المدير في Supabase.');
+          }
+
+          toast('تم حذف الأنشودة');
+
+          setTimeout(() => {
+            location.replace(
+              'library.html' +
+              (room ? '?room=' + encodeURIComponent(room) : '')
+            );
+          }, 700);
+
+        } catch (err) {
+          console.error('خطأ حذف الأنشودة:', err);
+          toast(
+            'تعذّر الحذف. افتح Console لمعرفة الخطأ؛ قد تكون المشكلة من الصلاحيات أو ارتباط الأنشودة بسجلات أخرى.',
+            true
+          );
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    }
+
+    // اعتماد الأنشودة للقائد والمدير عند وجود غرفة مختارة
+    const s = document.getElementById('select');
+
+    if (s) {
+      s.onclick = async () => {
+        s.disabled = true;
+        s.textContent = 'جارٍ الاعتماد...';
+
+        try {
+          const { error } = await db.rpc(
+            'select_nasheed_for_room',
+            {
+              p_room_id: room,
+              p_nasheed_id: n.id
+            }
+          );
+
+          if (error) {
+            console.error('خطأ اعتماد الأنشودة:', error);
+            toast(
+              'لم يتم الاعتماد. تحقق من صلاحيات الحساب ودالة قاعدة البيانات.',
+              true
+            );
+          } else {
+            toast('تم اعتماد الأنشودة بنجاح');
+          }
+        } catch (e) {
+          console.error('خطأ غير متوقع أثناء الاعتماد:', e);
+          toast('حدث خطأ أثناء اعتماد الأنشودة.', true);
+        } finally {
+          s.disabled = false;
+          s.textContent = 'اعتماد الأنشودة للفرقة';
+        }
+      };
+    }
+  })();
+  </script>
+</body>
+</html>

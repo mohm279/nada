@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>غرف الإنشاد | نَدى</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared.js"></script>
+
+  <style>
+    .room-form {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .room-form input,
+    .room-form textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #d8dfd7;
+      border-radius: 10px;
+      font: inherit;
+      background: #fff;
+      color: #173d32;
+    }
+
+    .room-form textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .room-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .btn.danger {
+      background: #a93636;
+      color: white;
+      border: none;
+    }
+
+    .btn.warning {
+      background: #f4e7c8;
+      color: #684b13;
+      border: none;
+    }
+
+    .room-status {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #e5f3e9;
+      color: #176344;
+      font-size: 13px;
+    }
+
+    .room-status.off {
+      background: #f8e5e3;
+      color: #9b302b;
+    }
+
+    .admin-tools {
+      margin-bottom: 22px;
+    }
+
+    .section-title {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">جارٍ تحميل الغرف...</div>
+
+  <script>
+    (async () => {
+      const app = document.getElementById('app');
+
+      try {
+        const ctx = await requireSession();
+        if (!ctx) return;
+
+        const isAdmin = ctx.account.role === 'admin';
+        const isLeader = ctx.account.role === 'leader';
+
+        app.innerHTML =
+          styles() +
+          commonHeader('غرف الإنشاد', ctx.account) +
+          `
+            <section id="adminTools" class="card admin-tools" hidden>
+              <h2 class="section-title">إدارة غرف الإنشاد</h2>
+              <p class="muted">
+                أضف الغرف وعدّل بياناتها أو عطّلها وقت ما بدك.
+              </p>
+
+              <form id="addRoomForm" class="room-form">
+                <input
+                  id="roomName"
+                  type="text"
+                  maxlength="120"
+                  placeholder="اسم الغرفة أو الفرقة"
+                  required
+                >
+
+                <textarea
+                  id="roomDescription"
+                  maxlength="500"
+                  placeholder="وصف الغرفة (اختياري)"
+                ></textarea>
+
+                <button class="btn" type="submit">
+                  إضافة غرفة جديدة
+                </button>
+              </form>
+            </section>
+
+            <section id="rooms" class="grid"></section>
+          </main>
+          `;
+
+        const target = document.getElementById('rooms');
+        const adminTools = document.getElementById('adminTools');
+
+        if (isAdmin) {
+          adminTools.hidden = false;
+        }
+
+        let rooms = [];
+        let selections = [];
+        let selectionError = false;
+
+        const page =
+          isLeader ? 'leader.html' :
+          isAdmin ? 'admin.html' :
+          'member.html';
+
+        async function loadRooms() {
+          target.innerHTML =
+            '<div class="empty">جارٍ تحميل الغرف...</div>';
+
+          // الأدمن يشاهد جميع الغرف، بما فيها المعطّلة.
+          // بقية الحسابات تشاهد الغرف المفعّلة المسموح لها بها فقط.
+          if (isAdmin) {
+            const { data, error } = await db
+              .from('rooms')
+              .select('id, name, description, is_active, created_at')
+              .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            rooms = data || [];
+          } else {
+            rooms = await getAllowedRooms(ctx.account.id);
+          }
+
+          selections = [];
+          selectionError = false;
+
+          if (rooms.length) {
+            const { data, error } = await db
+              .from('active_selections')
+              .select('room_id, nasheed_id, anasheed(title)')
+              .in('room_id', rooms.map(r => r.id));
+
+            if (error) {
+              console.error('خطأ تحميل الأناشيد النشطة:', error);
+              selectionError = true;
+
+              toast(
+                'تعذّر تحميل الأناشيد الحالية. تحقق من صلاحيات القراءة.',
+                true
+              );
+            } else {
+              selections = data || [];
+            }
+          }
+
+          renderRooms();
+        }
+
+        function renderRooms() {
+          if (!rooms.length) {
+            target.innerHTML = `
+              <div class="empty">
+                ${isAdmin
+                  ? 'ما في غرف حاليًا. تقدر تضيف أول غرفة من النموذج أعلاه.'
+                  : 'لا توجد غرف متاحة لهذا الحساب.'}
+              </div>
+            `;
+            return;
+          }
+
+          target.innerHTML = rooms.map(r => {
+            const selection = selections.find(
+              x => x.room_id === r.id
+            );
+
+            const title = selectionError
+              ? 'تعذّر تحميل الأنشودة الحالية'
+              : selection?.anasheed?.title || 'لا توجد أنشودة مختارة';
+
+            const hasSelection = !selectionError && !!selection;
+
+            return `
+              <article class="card">
+                ${isAdmin ? `
+                  <span class="room-status ${r.is_active ? '' : 'off'}">
+                    ${r.is_active ? 'الغرفة مفعّلة' : 'الغرفة معطّلة'}
+                  </span>
+                ` : `
+                  <span class="badge">
+                    ${selectionError
+                      ? 'تعذّر تحميل الحالة'
+                      : hasSelection
+                        ? 'توجد أنشودة مختارة'
+                        : 'بانتظار اختيار أنشودة'}
+                  </span>
+                `}
+
+                <h2>${escapeHtml(r.name)}</h2>
+
+                <p class="muted">
+                  ${escapeHtml(
+                    r.description || 'مساحة مخصصة لفريق الإنشاد'
+                  )}
+                </p>
+
+                <div class="card">
+                  <p class="eyebrow">الأنشودة الحالية</p>
+                  <h3>${escapeHtml(title)}</h3>
+                </div>
+
+                <div class="room-actions">
+                  ${r.is_active ? `
+                    <a
+                      class="btn"
+                      href="${page}?room=${encodeURIComponent(r.id)}"
+                    >دخول الغرفة</a>
+
+                    ${(isAdmin || isLeader) ? `
+                      <a
+                        class="btn light"
+                        href="library.html?room=${encodeURIComponent(r.id)}"
+                      >تغيير الأنشودة</a>
+                    ` : ''}
+                  ` : ''}
+
+                  ${isAdmin ? `
+                    <button
+                      class="btn light"
+                      type="button"
+                      data-action="edit"
+                      data-id="${r.id}"
+                    >تعديل البيانات</button>
+
+                    <button
+                      class="btn warning"
+                      type="button"
+                      data-action="toggle"
+                      data-id="${r.id}"
+                    >${r.is_active ? 'تعطيل الغرفة' : 'تفعيل الغرفة'}</button>
+
+                    <button
+                      class="btn danger"
+                      type="button"
+                      data-action="delete"
+                      data-id="${r.id}"
+                    >حذف نهائي</button>
+                  ` : ''}
+                </div>
+              </article>
+            `;
+          }).join('');
+        }
+
+        // إضافة غرفة جديدة
+        if (isAdmin) {
+          document
+            .getElementById('addRoomForm')
+            .addEventListener('submit', async e => {
+              e.preventDefault();
+
+              const name = document
+                .getElementById('roomName')
+                .value.trim();
+
+              const description = document
+                .getElementById('roomDescription')
+                .value.trim();
+
+              const submitButton = e.submitter;
+
+              if (!name) {
+                toast('اكتب اسم الغرفة أولًا.', true);
+                return;
+              }
+
+              submitButton.disabled = true;
+
+              try {
+                const { error } = await db
+                  .from('rooms')
+                  .insert({
+                    name,
+                    description: description || null,
+                    is_active: true
+                  });
+
+                if (error) throw error;
+
+                e.target.reset();
+                toast('تمت إضافة الغرفة بنجاح.');
+                await loadRooms();
+              } catch (error) {
+                console.error('خطأ إضافة الغرفة:', error);
+                toast(
+                  'تعذّرت إضافة الغرفة: ' + error.message,
+                  true
+                );
+              } finally {
+                submitButton.disabled = false;
+              }
+            });
+
+          // تعديل البيانات، تفعيل وتعطيل الغرفة، أو حذفها
+          target.addEventListener('click', async e => {
+            const button = e.target.closest('button[data-action]');
+            if (!button) return;
+
+            const room = rooms.find(
+              r => r.id === button.dataset.id
+            );
+
+            if (!room) return;
+
+            const action = button.dataset.action;
+            let updateData = null;
+
+            // تعديل بيانات الغرفة
+            if (action === 'edit') {
+              const name = prompt(
+                'اكتب اسم الغرفة:',
+                room.name
+              );
+
+              if (name === null) return;
+
+              if (!name.trim()) {
+                toast(
+                  'اسم الغرفة لا يمكن أن يكون فارغًا.',
+                  true
+                );
+                return;
+              }
+
+              const description = prompt(
+                'اكتب وصف الغرفة (اتركه فارغًا إذا ما بدك وصفًا):',
+                room.description || ''
+              );
+
+              if (description === null) return;
+
+              updateData = {
+                name: name.trim(),
+                description: description.trim() || null
+              };
+            }
+
+            // التفعيل والتعطيل مباشرة بدون نافذة تأكيد
+            if (action === 'toggle') {
+              updateData = {
+                is_active: !room.is_active
+              };
+            }
+
+            button.disabled = true;
+
+            try {
+              if (action === 'edit' || action === 'toggle') {
+                const { error } = await db
+                  .from('rooms')
+                  .update(updateData)
+                  .eq('id', room.id);
+
+                if (error) throw error;
+
+                toast(
+                  action === 'toggle'
+                    ? (
+                        updateData.is_active
+                          ? 'تم تفعيل الغرفة.'
+                          : 'تم تعطيل الغرفة.'
+                      )
+                    : 'تم تحديث الغرفة بنجاح.'
+                );
+
+                await loadRooms();
+              }
+
+              // تأكيد الحذف فقط؛ لأنه نهائي ولا يمكن التراجع عنه
+              if (action === 'delete') {
+                const confirmed = confirm(
+                  `تحذير: هل أنت متأكد من حذف "${room.name}" نهائيًا؟\n\n` +
+                  'سيؤدي ذلك إلى حذف صلاحيات الغرفة واختيارها الحالي وسجلّات الاختيار المرتبطة بها. لا يمكن التراجع عن هذا الحذف.'
+                );
+
+                if (!confirmed) return;
+
+                const { error } = await db
+                  .from('rooms')
+                  .delete()
+                  .eq('id', room.id);
+
+                if (error) throw error;
+
+                toast('تم حذف الغرفة نهائيًا.');
+                await loadRooms();
+              }
+            } catch (error) {
+              console.error('خطأ إدارة الغرفة:', error);
+              toast(
+                'تعذّر تنفيذ العملية: ' + error.message,
+                true
+              );
+            } finally {
+              button.disabled = false;
+            }
+          });
+        }
+
+        await loadRooms();
+
+      } catch (e) {
+        console.error('خطأ صفحة الغرف:', e);
+
+        app.innerHTML =
+          styles() +
+          `
+            <main class="wrap">
+              <div class="empty">
+                تعذّر تحميل الغرف. تحقق من الاتصال وصلاحيات الحساب،
+                وافتح Console لمعرفة تفاصيل الخطأ.
+              </div>
+
+              <button class="btn" id="retryRooms" type="button">
+                إعادة المحاولة
+              </button>
+            </main>
+          `;
+
+        document.getElementById('retryRooms').onclick = () => {
+          location.reload();
+        };
+      }
+    })();
+  </script>
+</body>
+</html>

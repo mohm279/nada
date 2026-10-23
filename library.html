@@ -1,0 +1,553 @@
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>فهرس الأناشيد | نَدى</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared.js"></script>
+  <style>
+    .library-tools {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .library-tools input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #d8dfd7;
+      border-radius: 10px;
+      font: inherit;
+    }
+
+    .pagination {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin: 18px 0;
+    }
+
+    .pagination button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .pagination .current-page {
+      background: #0b5d4b;
+      color: #fff;
+      border: 1px solid #0b5d4b;
+    }
+
+    .page-info {
+      text-align: center;
+      color: #64756d;
+      font-size: 14px;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">جارٍ تحميل الفهرس...</div>
+
+  <script>
+  (async () => {
+    const app = document.getElementById('app');
+
+    try {
+      let ctx = null;
+
+    const { data: { session } } = await db.auth.getSession();
+
+    if (session) {
+      ctx = await requireSession();
+      }
+
+    const room = ctx ? selectedRoomId() : null;
+    const isAdmin = ctx?.account?.role === 'admin';
+    const canSelect =
+        !!ctx &&
+      (ctx.account.role === 'admin' ||
+   ctx.account.role === 'leader');
+
+      const PAGE_SIZE = 50;
+
+      let currentPage = 0;
+      let totalCount = 0;
+      let searchTimer = null;
+      let requestNumber = 0;
+
+      app.innerHTML = styles() +
+        commonHeader('فهرس الأناشيد العام', ctx?.account || null) + `
+        ${isAdmin ? `
+          <section class="card" style="margin-bottom:20px">
+            <h2>إضافة أنشودة جديدة</h2>
+
+            <p class="muted">
+              أضف أنشودة إلى الفهرس العام لتكون متاحة للجميع.
+            </p>
+
+            <form id="addNasheedForm">
+              <label for="newTitle">عنوان الأنشودة</label>
+              <input
+                id="newTitle"
+                maxlength="250"
+                placeholder="اكتب عنوان الأنشودة"
+                required
+              >
+
+              <label for="newCategory">المقام</label>
+              <input
+                id="newCategory"
+                maxlength="150"
+                placeholder="مثلاً: البياتي أو الحجاز أو الصبا"
+              >
+
+              <label for="newContent">كلمات الأنشودة</label>
+              <textarea
+                id="newContent"
+                rows="8"
+                placeholder="اكتب كلمات الأنشودة هنا..."
+                required
+              ></textarea>
+
+              <button class="btn" id="addNasheedBtn" type="submit">
+                إضافة الأنشودة
+              </button>
+            </form>
+          </section>
+        ` : ''}
+
+        <section class="card library-tools">
+          <h2>فهرس الأناشيد</h2>
+
+          ${room ? `
+            <p class="muted" id="roomName">
+              الغرفة المختارة: جارٍ التحميل...
+            </p>
+          ` : `
+            <p class="muted">
+              لم تختر غرفة بعد. يمكنك تصفّح الأناشيد،
+              لكن اعتماد أنشودة يحتاج إلى اختيار غرفة.
+            </p>
+          `}
+
+          <label for="q">البحث في الأناشيد</label>
+
+          <input
+            id="q"
+            type="search"
+            placeholder="ابحث بعنوان الأنشودة أو مقامها..."
+            autocomplete="off"
+          >
+
+          <p class="muted" id="count" aria-live="polite">
+            جارٍ تحميل الأناشيد...
+          </p>
+        </section>
+
+        <section id="list" class="grid"></section>
+
+        <div
+          id="pagination"
+          class="pagination"
+          aria-label="صفحات الفهرس"
+        ></div>
+
+        <p id="pageInfo" class="page-info"></p>
+      </main>`;
+
+      const searchInput = document.getElementById('q');
+      const list = document.getElementById('list');
+      const count = document.getElementById('count');
+      const pagination = document.getElementById('pagination');
+      const pageInfo = document.getElementById('pageInfo');
+
+      // عرض اسم الغرفة المختارة
+      if (room) {
+        const { data, error } = await db
+          .from('rooms')
+          .select('name')
+          .eq('id', room)
+          .maybeSingle();
+
+        const roomName = document.getElementById('roomName');
+
+        if (roomName) {
+          roomName.textContent = error
+            ? 'الغرفة المختارة'
+            : 'الغرفة المختارة: ' + (data?.name || 'غرفة');
+        }
+      }
+
+      // إضافة أنشودة جديدة - للمدير فقط
+      if (isAdmin) {
+        document
+          .getElementById('addNasheedForm')
+          .addEventListener('submit', async e => {
+            e.preventDefault();
+
+            const btn =
+              document.getElementById('addNasheedBtn');
+
+            const title =
+              document.getElementById('newTitle').value.trim();
+
+            const category =
+              document.getElementById('newCategory').value.trim();
+
+            const content =
+              document.getElementById('newContent').value.trim();
+
+            if (!title || !content) {
+              toast('عنوان الأنشودة وكلماتها مطلوبان.', true);
+              return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'جارٍ إضافة الأنشودة...';
+
+            try {
+              const { error } = await db
+                .from('anasheed')
+                .insert({
+                  title,
+                  category: category || null,
+                  content
+                });
+
+              if (error) throw error;
+
+              e.target.reset();
+              searchInput.value = '';
+              currentPage = 0;
+
+              await loadAnasheed();
+
+              toast('تمت إضافة الأنشودة بنجاح');
+
+              document.getElementById('newTitle').focus();
+
+            } catch (err) {
+              console.error('خطأ إضافة الأنشودة:', err);
+
+              toast(
+                'تعذّرت إضافة الأنشودة. تحقق من صلاحيات المدير وسياسات قاعدة البيانات.',
+                true
+              );
+
+            } finally {
+              btn.disabled = false;
+              btn.textContent = 'إضافة الأنشودة';
+            }
+          });
+      }
+
+      // إنشاء أزرار التنقل بين الصفحات
+      function renderPagination() {
+        const pages = Math.max(
+          1,
+          Math.ceil(totalCount / PAGE_SIZE)
+        );
+
+        if (pages <= 1) {
+          pagination.innerHTML = '';
+          pageInfo.textContent =
+            totalCount ? 'الصفحة 1 من 1' : '';
+          return;
+        }
+
+        const start = Math.max(
+          0,
+          Math.min(currentPage - 2, pages - 5)
+        );
+
+        const end = Math.min(pages, start + 5);
+
+        let buttons = `
+          <button
+            class="btn light"
+            data-page="0"
+            ${currentPage === 0 ? 'disabled' : ''}
+          >الأولى</button>
+
+          <button
+            class="btn light"
+            data-page="${currentPage - 1}"
+            ${currentPage === 0 ? 'disabled' : ''}
+          >السابق</button>
+        `;
+
+        for (let p = start; p < end; p++) {
+          buttons += `
+            <button
+              class="btn ${p === currentPage
+                ? 'current-page'
+                : 'light'}"
+              data-page="${p}"
+              ${p === currentPage
+                ? 'aria-current="page"'
+                : ''}
+            >${p + 1}</button>
+          `;
+        }
+
+        buttons += `
+          <button
+            class="btn light"
+            data-page="${currentPage + 1}"
+            ${currentPage >= pages - 1 ? 'disabled' : ''}
+          >التالي</button>
+
+          <button
+            class="btn light"
+            data-page="${pages - 1}"
+            ${currentPage >= pages - 1 ? 'disabled' : ''}
+          >الأخيرة</button>
+        `;
+
+        pagination.innerHTML = buttons;
+
+        pageInfo.textContent =
+          `الصفحة ${currentPage + 1} من ${pages}`;
+      }
+
+      // تحميل 50 أنشودة فقط في كل مرة
+      async function loadAnasheed() {
+        const myRequest = ++requestNumber;
+
+        count.textContent = 'جارٍ تحميل الأناشيد...';
+        list.innerHTML = '';
+        pagination.innerHTML = '';
+        pageInfo.textContent = '';
+
+        const { data, error } = await db.rpc(
+          'search_anasheed',
+          {
+            p_search: searchInput.value.trim() || null,
+            p_offset: currentPage * PAGE_SIZE,
+            p_limit: PAGE_SIZE
+          }
+        );
+
+        if (error) throw error;
+
+        // تجاهل نتيجة بحث قديم إذا وصل بحث أحدث
+        if (myRequest !== requestNumber) return;
+
+        const rows = data || [];
+
+        totalCount = rows.length
+          ? Number(rows[0].total_count)
+          : 0;
+
+        const pages = Math.max(
+          1,
+          Math.ceil(totalCount / PAGE_SIZE)
+        );
+
+        if (currentPage >= pages) {
+          currentPage = pages - 1;
+
+          if (currentPage < 0) currentPage = 0;
+
+          return loadAnasheed();
+        }
+
+        count.textContent = searchInput.value.trim()
+          ? `النتائج: ${totalCount} — يعرض ${rows.length} أنشودة في هذه الصفحة`
+          : `عدد الأناشيد: ${totalCount} — يعرض ${rows.length} أنشودة في هذه الصفحة`;
+
+        if (!rows.length) {
+          list.innerHTML = `
+            <div class="empty">
+              ${searchInput.value.trim()
+                ? 'ما لقينا أناشيد مطابقة لبحثك.'
+                : 'لا توجد أناشيد مضافة حتى الآن.'}
+            </div>
+          `;
+
+          renderPagination();
+          return;
+        }
+
+        list.innerHTML = rows.map((n, i) => `
+          <article class="card">
+            <span class="muted">
+              أنشودة ${currentPage * PAGE_SIZE + i + 1}
+            </span>
+
+            <h2>${escapeHtml(n.title || 'بدون عنوان')}</h2>
+
+            <p class="muted">
+              المقام: ${escapeHtml(n.category || 'غير محدد')}
+            </p>
+
+            <div
+              style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"
+            >
+              <a
+                class="btn"
+                href="nasheed.html?id=${encodeURIComponent(n.id)}${room ? '&room=' + encodeURIComponent(room) : ''}"
+              >عرض الأنشودة</a>
+
+              ${canSelect && room ? `
+                <button
+                  class="btn light select-btn"
+                  type="button"
+                  data-id="${escapeHtml(n.id)}"
+                >اعتماد للفرقة</button>
+              ` : ''}
+            </div>
+          </article>
+        `).join('');
+
+        renderPagination();
+      }
+
+      // التنقل بين الصفحات
+      pagination.addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-page]');
+
+        if (!btn || btn.disabled) return;
+
+        const next = Number(btn.dataset.page);
+
+        const pages = Math.max(
+          1,
+          Math.ceil(totalCount / PAGE_SIZE)
+        );
+
+        if (
+          !Number.isInteger(next) ||
+          next < 0 ||
+          next >= pages ||
+          next === currentPage
+        ) {
+          return;
+        }
+
+        currentPage = next;
+
+        try {
+          await loadAnasheed();
+        } catch (err) {
+          showLoadError(err);
+        }
+      });
+
+      // اعتماد أنشودة للغرفة المختارة
+      list.addEventListener('click', async e => {
+        const btn = e.target.closest('.select-btn');
+
+        if (!btn) return;
+
+        const nasheedId = btn.dataset.id;
+
+        if (!room || !nasheedId) {
+          toast('اختر غرفة أولًا.', true);
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'جارٍ الاعتماد...';
+
+        try {
+          const { error } = await db.rpc(
+            'select_nasheed_for_room',
+            {
+              p_room_id: room,
+              p_nasheed_id: nasheedId
+            }
+          );
+
+          if (error) throw error;
+
+          toast('تم اعتماد الأنشودة للفرقة بنجاح');
+
+        } catch (err) {
+          console.error('خطأ اعتماد الأنشودة:', err);
+
+          toast(
+            'تعذّر الاعتماد. تحقق من صلاحيات الحساب ودالة قاعدة البيانات.',
+            true
+          );
+
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'اعتماد للفرقة';
+        }
+      });
+
+      // البحث مع تأخير بسيط لتقليل الطلبات
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(() => {
+          currentPage = 0;
+
+          loadAnasheed().catch(showLoadError);
+        }, 300);
+      });
+
+      // عرض خطأ التحميل مع زر لإعادة المحاولة
+      function showLoadError(err) {
+        console.error('خطأ تحميل الفهرس:', err);
+
+        count.textContent = 'تعذّر تحميل الأناشيد.';
+
+        list.innerHTML = `
+          <div class="empty">
+            تعذّر تحميل الفهرس. تحقق من الاتصال وصلاحيات القراءة.
+
+            <button class="btn" id="retry" type="button">
+              إعادة المحاولة
+            </button>
+          </div>
+        `;
+
+        pagination.innerHTML = '';
+
+        document.getElementById('retry').onclick =
+          async () => {
+            const btn = document.getElementById('retry');
+
+            btn.disabled = true;
+            btn.textContent = 'جارٍ إعادة المحاولة...';
+
+            try {
+              await loadAnasheed();
+            } catch (e) {
+              showLoadError(e);
+            }
+          };
+      }
+
+      try {
+        await loadAnasheed();
+      } catch (err) {
+        showLoadError(err);
+      }
+
+    } catch (err) {
+      console.error('خطأ صفحة الفهرس:', err);
+
+      app.innerHTML = styles() + `
+        <main class="wrap">
+          <div class="empty">
+            تعذّر فتح فهرس الأناشيد.
+            تحقق من تسجيل الدخول والاتصال.
+          </div>
+        </main>
+      `;
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>لوحة القائد | نَدى</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared.js"></script>
+</head>
+
+<body>
+  <div id="app">جارٍ تحميل لوحة القائد...</div>
+
+  <script>
+  (async () => {
+    const ctx = await requireSession();
+    if (!ctx) return;
+
+    if (ctx.account.role !== 'leader' && ctx.account.role !== 'admin') {
+      location.replace('member.html' + location.search);
+      return;
+    }
+
+    const room = selectedRoomId();
+
+    if (!room) {
+      location.replace('rooms.html');
+      return;
+    }
+
+    const rooms = await getAllowedRooms(ctx.account.id);
+    const currentRoom = rooms.find(r => r.id === room);
+
+    if (!currentRoom) {
+      location.replace('rooms.html');
+      return;
+    }
+
+    document.getElementById('app').innerHTML =
+      styles() +
+      commonHeader('لوحة القائد', ctx.account) +
+      `
+      <section class="card" style="margin-bottom:18px">
+        <p class="eyebrow">لوحة التحكم</p>
+        <p class="muted">الغرفة الحالية</p>
+        <h2>${escapeHtml(currentRoom.name)}</h2>
+
+        <p class="muted">
+          من هنا يمكنك متابعة الأنشودة المعتمدة وتغييرها من الفهرس العام.
+        </p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+          <a
+            class="btn"
+            href="library.html?room=${encodeURIComponent(room)}"
+          >
+            اختيار أنشودة
+          </a>
+
+          <a class="btn light" href="rooms.html">
+            تغيير الغرفة
+          </a>
+        </div>
+      </section>
+
+      <section id="active" class="card" aria-live="polite">
+        <div class="empty">جارٍ تحميل الأنشودة الحالية...</div>
+      </section>
+      </main>
+      `;
+
+    const activeElement = document.getElementById('active');
+    let loading = false;
+
+    // تحميل الأنشودة النشطة للغرفة الحالية
+    async function load() {
+      if (loading) return;
+      loading = true;
+
+      try {
+        const { data, error } = await db
+          .from('active_selections')
+          .select('nasheed_id,selected_at,anasheed(id,title,content)')
+          .eq('room_id', room)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (!data || !data.anasheed) {
+          activeElement.innerHTML = `
+            <div class="empty">
+              <h2>لا توجد أنشودة معتمدة حاليًا</h2>
+              <p>اختر أنشودة من الفهرس لتظهر للمنشدين في هذه الغرفة.</p>
+
+              <a
+                class="btn"
+                href="library.html?room=${encodeURIComponent(room)}"
+              >
+                اختيار أنشودة الآن
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        const selectedTime = data.selected_at
+          ? new Date(data.selected_at).toLocaleString('ar-JO')
+          : 'غير متوفر';
+
+        activeElement.innerHTML = `
+          <div style="text-align:center;padding:12px 4px">
+            <span class="badge">الأنشودة النشطة</span>
+
+            <p class="eyebrow" style="margin-top:20px">
+              الأنشودة المعتمدة للغرفة
+            </p>
+
+            <h2 style="font-size:1.6rem;line-height:1.8">
+              ${escapeHtml(data.anasheed.title)}
+            </h2>
+
+            <p class="muted">
+              وقت الاعتماد: ${escapeHtml(selectedTime)}
+            </p>
+
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">
+              <a
+                class="btn"
+                href="nasheed.html?id=${encodeURIComponent(data.nasheed_id)}&room=${encodeURIComponent(room)}"
+              >
+                عرض كلمات الأنشودة
+              </a>
+
+              <button class="btn light" id="clear" type="button">
+                إلغاء الاختيار
+              </button>
+            </div>
+          </div>
+        `;
+
+        // إلغاء الأنشودة النشطة
+        document.getElementById('clear').onclick = async () => {
+          
+
+
+          const btn = document.getElementById('clear');
+          btn.disabled = true;
+          btn.textContent = 'جارٍ الإلغاء...';
+
+          try {
+            const { error } = await db.rpc(
+              'clear_nasheed_for_room',
+              { p_room_id: room }
+            );
+
+            if (error) throw error;
+
+            toast('تم إلغاء الاختيار');
+            await load();
+          } catch (err) {
+            console.error('خطأ إلغاء الاختيار:', err);
+            toast(
+              'تعذّر إلغاء الاختيار. تحقق من صلاحيات الحساب ودالة قاعدة البيانات.',
+              true
+            );
+
+            btn.disabled = false;
+            btn.textContent = 'إلغاء الاختيار';
+          }
+        };
+      } catch (err) {
+        console.error('خطأ تحميل الأنشودة:', err);
+
+        activeElement.innerHTML = `
+          <div class="empty">
+            <p>تعذّر تحميل الأنشودة الحالية.</p>
+            <button class="btn" id="retryLoad" type="button">
+              إعادة المحاولة
+            </button>
+          </div>
+        `;
+
+        document.getElementById('retryLoad').onclick = () => {
+          load();
+        };
+      } finally {
+        loading = false;
+      }
+    }
+
+    // التحميل الأول
+    await load();
+
+    // تحديث مباشر عند تغيير الأنشودة في الغرفة
+    const channel = db
+      .channel('leader-room-' + room)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'active_selections',
+          filter: 'room_id=eq.' + room
+        },
+        () => {
+          load();
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          load();
+        }
+      });
+
+    // تنظيف الاتصال عند مغادرة الصفحة
+    window.addEventListener('beforeunload', () => {
+      db.removeChannel(channel);
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>واجهة المنشد | نَدى</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  >
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared.js"></script>
+</head>
+
+<body>
+  <div id="app">جارٍ تحميل الغرفة...</div>
+
+  <script>
+    (async () => {
+      const ctx = await requireSession();
+      if (!ctx) return;
+
+      if (ctx.account.role === 'leader') {
+        location.replace('leader.html' + location.search);
+        return;
+      }
+
+      if (ctx.account.role === 'admin') {
+        location.replace('admin.html' + location.search);
+        return;
+      }
+
+      const room = selectedRoomId();
+
+      if (!room) {
+        location.replace('rooms.html');
+        return;
+      }
+
+      let rooms;
+
+      try {
+        rooms = await getAllowedRooms(ctx.account.id);
+      } catch (err) {
+        console.error('خطأ تحميل الغرف:', err);
+
+        document.getElementById('app').innerHTML = `
+          <div dir="rtl" style="padding:30px;text-align:center">
+            <h2>تعذّر تحميل الغرف</h2>
+            <p>تحقق من اتصالك بالإنترنت ثم أعد المحاولة.</p>
+            <button class="btn" onclick="location.reload()">
+              إعادة المحاولة
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const currentRoom = rooms.find(r => r.id === room);
+
+      if (!currentRoom) {
+        location.replace('rooms.html');
+        return;
+      }
+
+      document.getElementById('app').innerHTML =
+        styles() +
+        commonHeader('واجهة المنشد', ctx.account) +
+        `
+          <section class="card" style="margin-bottom:18px">
+            <p class="eyebrow">أهلًا بكم في نَدى</p>
+            <p class="muted">الغرفة الحالية</p>
+            <h2>${escapeHtml(currentRoom.name)}</h2>
+            <p class="muted">
+              هنا تظهر الأنشودة التي اعتمدها قائد الفرقة،
+              وتتحدّث تلقائيًا عند تغييرها.
+            </p>
+          </section>
+
+          <section id="active" class="card" aria-live="polite">
+            <div class="empty">جارٍ تحميل اختيار القائد...</div>
+          </section>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+            <a
+              class="btn light"
+              href="library.html?room=${encodeURIComponent(room)}"
+            >
+              فهرس الأناشيد العام
+            </a>
+
+            <a class="btn light" href="rooms.html">
+              تغيير الغرفة
+            </a>
+          </div>
+        </main>
+      `;
+
+      const activeElement = document.getElementById('active');
+
+      let loading = false;
+      let reloadRequested = false;
+      let channel = null;
+
+      // تحميل الأنشودة المعتمدة للغرفة الحالية
+      async function loadActiveNasheed() {
+        if (loading) {
+          reloadRequested = true;
+          return;
+        }
+
+        loading = true;
+
+        try {
+          do {
+            reloadRequested = false;
+
+            const { data, error } = await db
+              .from('active_selections')
+              .select('nasheed_id,selected_at,anasheed(id,title,content)')
+              .eq('room_id', room)
+              .maybeSingle();
+
+            if (error) throw error;
+
+            if (!data || !data.anasheed) {
+              activeElement.innerHTML = `
+                <div class="empty">
+                  <h2>بانتظار اختيار القائد</h2>
+                  <p>لم يعتمد القائد أنشودة لهذه الغرفة حتى الآن.</p>
+                  <p class="muted">
+                    ستظهر الأنشودة هنا تلقائيًا عند اعتمادها.
+                  </p>
+                </div>
+              `;
+            } else {
+              const selectedTime = data.selected_at
+                ? new Date(data.selected_at).toLocaleString('ar-JO')
+                : 'غير متوفر';
+
+              activeElement.innerHTML = `
+                <div style="text-align:center;padding:12px 4px">
+                  <span class="badge">الأنشودة المعتمدة</span>
+
+                  <p class="eyebrow" style="margin-top:20px">
+                    اختيار قائد الفرقة
+                  </p>
+
+                  <h2 style="font-size:1.6rem;line-height:1.8">
+                    ${escapeHtml(data.anasheed.title)}
+                  </h2>
+
+                  <p class="muted">
+                    وقت الاعتماد: ${escapeHtml(selectedTime)}
+                  </p>
+
+                  <a
+                    class="btn"
+                    style="display:inline-block;margin-top:12px"
+                    href="nasheed.html?id=${encodeURIComponent(data.nasheed_id)}&room=${encodeURIComponent(room)}"
+                  >
+                    فتح كلمات الأنشودة
+                  </a>
+                </div>
+              `;
+            }
+          } while (reloadRequested);
+        } catch (err) {
+          console.error('خطأ تحميل الأنشودة المعتمدة:', err);
+
+          activeElement.innerHTML = `
+            <div class="empty">
+              <p>تعذّر تحميل الأنشودة حاليًا.</p>
+              <button class="btn" id="retryLoad" type="button">
+                إعادة المحاولة
+              </button>
+            </div>
+          `;
+
+          document.getElementById('retryLoad').onclick = () => {
+            loadActiveNasheed();
+          };
+        } finally {
+          loading = false;
+        }
+      }
+
+      // التحميل الأول
+      await loadActiveNasheed();
+
+      // التحديث المباشر عند تغيير اختيار القائد
+      channel = db
+        .channel('member-room-' + room)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'active_selections',
+            filter: 'room_id=eq.' + room
+          },
+          () => {
+            loadActiveNasheed();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            loadActiveNasheed();
+          }
+        });
+
+      // تنظيف الاتصال عند مغادرة الصفحة
+      window.addEventListener('beforeunload', () => {
+        if (channel) {
+          db.removeChannel(channel);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

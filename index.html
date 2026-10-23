@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b5d4b">
+  <meta name="description" content="نَدى، منصة الأناشيد وفهرس كلمات الأناشيد وإدارة فرق الإنشاد.">
+  <title>نَدى | NADA</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+  <style>
+    :root {
+      --g: #0b5d4b;
+      --g2: #08463a;
+      --iv: #fbf8ef;
+      --au: #b8975a;
+      --tx: #1d2b27;
+      --mu: #64756f;
+      --bd: #e6dfcc;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Cairo, sans-serif;
+      background: var(--iv);
+      color: var(--tx);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    a { text-decoration: none; }
+
+    .topbar {
+      background: var(--g);
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .brand small {
+      display: block;
+      color: #e2c991;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .top-link {
+      color: white;
+      border: 1px solid #ffffff70;
+      border-radius: 10px;
+      padding: 7px 14px;
+    }
+
+    .hero {
+      max-width: 900px;
+      margin: 55px auto 25px;
+      padding: 25px 20px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      color: var(--g);
+      font-size: clamp(28px, 5vw, 42px);
+      margin: 0 0 8px;
+    }
+
+    .hero p {
+      color: var(--mu);
+      margin: 0;
+    }
+
+    .actions {
+      max-width: 800px;
+      margin: 25px auto 60px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .action-card {
+      background: white;
+      border: 1px solid var(--bd);
+      border-radius: 18px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 5px 18px #0b5d4b0b;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .action-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 22px #0b5d4b16;
+    }
+
+    .action-card h2 {
+      color: var(--g);
+      font-size: 21px;
+      margin: 0 0 8px;
+    }
+
+    .action-card p {
+      color: var(--mu);
+      font-size: 14px;
+      margin: 0 0 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      background: var(--g);
+      color: white;
+      border: 0;
+      border-radius: 11px;
+      padding: 11px 16px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn:hover { background: var(--g2); }
+
+    .btn-light {
+      background: white;
+      color: var(--g);
+      border: 1px solid var(--g);
+    }
+
+    .btn-light:hover {
+      background: #f0f6f2;
+    }
+
+    .login {
+      max-width: 400px;
+      margin: 55px auto;
+      padding: 28px;
+      background: white;
+      border: 1px solid var(--bd);
+      border-radius: 20px;
+      box-shadow: 0 6px 20px #0b5d4b12;
+      text-align: center;
+    }
+
+    .login h2 {
+      color: var(--g);
+      margin: 0;
+    }
+
+    .mut {
+      color: var(--mu);
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      font: inherit;
+      padding: 12px 14px;
+      border: 1px solid var(--bd);
+      border-radius: 12px;
+      margin: 8px 0;
+      outline: none;
+    }
+
+    input:focus { border-color: var(--g); }
+
+    .back {
+      display: inline-block;
+      margin-top: 15px;
+      color: var(--g);
+    }
+
+    .hidden { display: none !important; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--mu);
+      border-top: 1px solid var(--bd);
+      font-size: 13px;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .t {
+      background: #a33;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      نَدى
+      <small>NADA</small>
+    </div>
+    <a class="top-link" id="headerRooms" href="index.html?login=1&next=rooms.html">
+      غرف الإنشاد
+    </a>
+  </header>
+
+  <main>
+    <section id="home">
+      <div class="hero">
+        <h1>أهلًا بك في نَدى</h1>
+        <p>صوتٌ يجمعنا — منصة الأناشيد وإدارة فرق الإنشاد</p>
+      </div>
+
+      <div class="actions">
+        <article class="action-card">
+          <h2>فهرس الأناشيد</h2>
+          <p>ابحث عن الأناشيد وتصفّح عناوينها وكلماتها.</p>
+          <a class="btn" href="library.html">دخول الفهرس</a>
+        </article>
+
+        
+      </div>
+    </section>
+
+    <section id="loginSection" class="login hidden">
+      <h2>تسجيل الدخول</h2>
+      <p class="mut">سجّل الدخول للوصول إلى غرف الإنشاد.</p>
+
+      <form id="loginForm">
+        <input
+          type="text"
+          id="username"
+          placeholder="اسم المستخدم"
+          required
+          autocomplete="username"
+        >
+
+        <input
+          type="password"
+          id="password"
+          placeholder="كلمة المرور"
+          required
+          autocomplete="current-password"
+        >
+
+        <button type="submit" class="btn" id="submitBtn">دخول</button>
+      </form>
+
+    <div class="mut" style="margin-top:18px;font-size:13px;line-height:2.2">
+        <div>منشد رئيسي — <b style="color:#0b8f70">leader</b> /leader</div>
+        <div>منشد — <b style="color:#0b8f70">member</b> /member</div>
+    </div>
+
+      <a href="index.html" class="back">العودة إلى الصفحة الرئيسية</a>
+    </section>
+  </main>
+
+  <footer>نَدى | NADA</footer>
+  <div id="toast" aria-live="polite"></div>
+
+  <script>
+    const SUPABASE_URL = "https://nnctumltrpzjnfqzjehv.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_ZMDTjVcFpY9WYc7zw-sZbw_iIGht7JQ";
+
+    const client = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    const params = new URLSearchParams(location.search);
+    const loginSection = document.getElementById("loginSection");
+    const home = document.getElementById("home");
+
+    // إظهار نموذج الدخول فقط عند طلب دخول الغرف.
+    if (params.get("login") === "1") {
+      home.classList.add("hidden");
+      loginSection.classList.remove("hidden");
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      const item = document.createElement("div");
+      item.className = "t";
+      item.textContent = message;
+      toast.replaceChildren(item);
+      setTimeout(() => {
+        if (item.parentNode === toast) item.remove();
+      }, 4000);
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const button = document.getElementById("submitBtn");
+      const username = document.getElementById("username").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+
+      if (!username || !password) {
+        showToast("أدخل اسم المستخدم وكلمة المرور.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "جارٍ تسجيل الدخول...";
+
+      try {
+        const { error } = await client.auth.signInWithPassword({
+          email: username + "@nadi.invalid",
+          password
+        });
+
+        if (error) throw error;
+
+        showToast("تم تسجيل الدخول بنجاح.");
+
+        // السماح بالعودة إلى صفحة داخل الموقع فقط.
+        const next = params.get("next");
+        const allowedPages = ["rooms.html"];
+
+        const destination = allowedPages.includes(next)
+          ? next
+          : "rooms.html";
+
+        location.replace(destination);
+      } catch (error) {
+        console.error("Login error:", error);
+        showToast("اسم المستخدم أو كلمة المرور غير صحيحة.");
+        button.disabled = false;
+        button.textContent = "دخول";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>لوحة المدير | نَدى</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared.js"></script>
+</head>
+
+<body>
+<div id="app">جارٍ تحميل لوحة المدير...</div>
+
+<script>
+(async () => {
+  const app = document.getElementById('app');
+
+  try {
+    const ctx = await requireSession();
+    if (!ctx) return;
+
+    if (ctx.account.role !== 'admin') {
+      location.replace(
+        ctx.account.role === 'leader'
+          ? 'leader.html' + location.search
+          : 'member.html' + location.search
+      );
+      return;
+    }
+
+    const roomId = selectedRoomId();
+
+    // لوحة الإدارة العامة عند عدم اختيار غرفة
+    if (!roomId) {
+      app.innerHTML =
+        styles() +
+        commonHeader('لوحة المدير', ctx.account) +
+        `
+        <div class="grid">
+          <a class="card" href="rooms.html">
+            <h2>غرف الإنشاد</h2>
+            <p class="muted">الدخول إلى الغرف ومتابعة الأناشيد الحالية.</p>
+          </a>
+
+          <a class="card" href="library.html">
+            <h2>فهرس الأناشيد العام</h2>
+            <p class="muted">استعراض الأناشيد والبحث فيها.</p>
+          </a>
+
+          <section class="card">
+            <h2>إضافة أنشودة</h2>
+            <form id="add">
+              <label>عنوان الأنشودة</label>
+              <input id="title" required>
+
+              <label>التصنيف (اختياري)</label>
+              <input id="category">
+
+              <label>كلمات الأنشودة</label>
+              <textarea id="content" required></textarea>
+
+              <button class="btn" id="save" type="submit">
+                حفظ الأنشودة
+              </button>
+            </form>
+          </section>
+        </div>
+        </main>`;
+
+      setupAddForm();
+      return;
+    }
+
+    // التعديل الأساسي:
+    // الأدمن يجلب الغرفة مباشرة من جدول rooms،
+    // ولا يعتمد على صلاحيات account_room_permissions.
+    const { data: room, error: roomError } = await db
+      .from('rooms')
+      .select('id, name, description, is_active')
+      .eq('id', roomId)
+      .maybeSingle();
+
+    if (roomError) throw roomError;
+
+    if (!room || !room.is_active) {
+      toast('الغرفة غير موجودة أو أنها معطّلة.', true);
+      location.replace('rooms.html');
+      return;
+    }
+
+    app.innerHTML =
+      styles() +
+      commonHeader('لوحة المدير', ctx.account) +
+      `
+      <section class="card">
+        <p class="eyebrow">الغرفة الحالية</p>
+        <h2>${escapeHtml(room.name)}</h2>
+
+        <div id="active" class="empty">
+          جارٍ تحميل الأنشودة الحالية...
+        </div>
+
+        <p style="margin-top:16px">
+          <a class="btn"
+             href="library.html?room=${encodeURIComponent(roomId)}">
+            تغيير الأنشودة
+          </a>
+
+          <a class="btn light" href="rooms.html">
+            العودة للغرف
+          </a>
+        </p>
+      </section>
+
+      <div class="grid" style="margin-top:20px">
+        <a class="card"
+           href="library.html?room=${encodeURIComponent(roomId)}">
+          <h2>فهرس الأناشيد العام</h2>
+          <p class="muted">استعراض الأناشيد وفتح الأنشودة المطلوبة.</p>
+        </a>
+
+        <section class="card">
+          <h2>إضافة أنشودة</h2>
+          <form id="add">
+            <label>عنوان الأنشودة</label>
+            <input id="title" required>
+
+            <label>التصنيف (اختياري)</label>
+            <input id="category">
+
+            <label>كلمات الأنشودة</label>
+            <textarea id="content" required></textarea>
+
+            <button class="btn" id="save" type="submit">
+              حفظ الأنشودة
+            </button>
+          </form>
+        </section>
+      </div>
+      </main>`;
+
+    async function loadActive() {
+      const { data, error } = await db
+        .from('active_selections')
+        .select('nasheed_id, selected_at, anasheed(id,title,content)')
+        .eq('room_id', roomId)
+        .maybeSingle();
+
+      const el = document.getElementById('active');
+
+      if (error) {
+        console.error('تعذّر تحميل الأنشودة الحالية:', error);
+        el.className = 'empty';
+        el.textContent =
+          'تعذّر تحميل الأنشودة. تحقق من صلاحيات القراءة (RLS).';
+        return;
+      }
+
+      if (!data || !data.anasheed) {
+        el.className = 'empty';
+        el.textContent =
+          'لا توجد أنشودة مختارة لهذه الغرفة حاليًا.';
+        return;
+      }
+
+      el.className = 'card';
+      el.innerHTML = `
+        <span class="badge">الأنشودة الشغّالة حاليًا</span>
+
+        <h2>${escapeHtml(data.anasheed.title)}</h2>
+
+        <p class="muted">
+          وقت الاختيار:
+          ${new Date(data.selected_at).toLocaleString('ar')}
+        </p>
+
+        <a class="btn"
+           href="nasheed.html?id=${encodeURIComponent(data.nasheed_id)}&room=${encodeURIComponent(roomId)}">
+          عرض الأنشودة
+        </a>
+
+        <button class="btn light" id="clear" type="button">
+          إلغاء الاختيار
+        </button>
+      `;
+
+      document.getElementById('clear').onclick = async () => {
+        const button = document.getElementById('clear');
+        button.disabled = true;
+
+        try {
+          const { error } = await db.rpc('clear_nasheed_for_room', {
+            p_room_id: roomId
+          });
+
+          if (error) throw error;
+
+          toast('تم إلغاء الاختيار');
+          await loadActive();
+        } catch (error) {
+          console.error(error);
+          toast('تعذّر إلغاء الاختيار', true);
+          button.disabled = false;
+        }
+      };
+    }
+
+    function setupAddForm() {
+      const form = document.getElementById('add');
+      if (!form) return;
+
+      form.onsubmit = async e => {
+        e.preventDefault();
+
+        const btn = document.getElementById('save');
+        btn.disabled = true;
+
+        try {
+          const { error } = await db.from('anasheed').insert({
+            title: document.getElementById('title').value.trim(),
+            category:
+              document.getElementById('category').value.trim() || null,
+            content: document.getElementById('content').value.trim()
+          });
+
+          if (error) throw error;
+
+          form.reset();
+          toast('تم حفظ الأنشودة');
+        } catch (error) {
+          console.error(error);
+          toast(
+            'تعذّرت الإضافة؛ تحقق من صلاحيات المدير والجدول',
+            true
+          );
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    }
+
+    setupAddForm();
+    await loadActive();
+
+    const channel = db
+      .channel('admin-active-' + roomId)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'active_selections',
+          filter: 'room_id=eq.' + roomId
+        },
+        () => loadActive()
+      )
+      .subscribe();
+
+    window.addEventListener('beforeunload', () => {
+      db.removeChannel(channel);
+    });
+
+  } catch (error) {
+    console.error('خطأ لوحة المدير:', error);
+
+    app.innerHTML =
+      styles() +
+      `
+      <main class="wrap">
+        <div class="empty">
+          تعذّر تحميل لوحة المدير. افتح Console لمعرفة تفاصيل الخطأ.
+          <p>${escapeHtml(error.message || 'خطأ غير معروف')}</p>
+        </div>
+
+        <a class="btn" href="rooms.html">العودة إلى الغرف</a>
+      </main>`;
+  }
+})();
+</script>
+</body>
+</html>
