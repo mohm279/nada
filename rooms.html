@@ -6,11 +6,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>غرف الإنشاد | نَدى</title>
 
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="shared.js"></script>
 
   <style>
+    /* =====================================
+       ROOM FORM & BASIC COMPONENTS
+    ===================================== */
+
     .room-form {
       display: grid;
       gap: 12px;
@@ -75,9 +80,11 @@
     .section-title {
       margin-bottom: 8px;
     }
-  </style>
 
-  <style id="nada-geometric-heritage">
+    /* =====================================
+       NADA - GEOMETRIC HERITAGE DESIGN
+    ===================================== */
+
     :root {
       --g: #0b5d4b;
       --g2: #08463a;
@@ -101,6 +108,7 @@
         radial-gradient(ellipse at 0% 0%,rgba(184,151,90,.10),transparent 32rem),
         radial-gradient(ellipse at 100% 10%,rgba(11,93,75,.09),transparent 34rem),
         var(--iv) !important;
+
       color: var(--tx);
       font-family: "Cairo",Tahoma,Arial,sans-serif;
     }
@@ -112,27 +120,46 @@
       pointer-events: none;
       z-index: -1;
       opacity: .20;
+
       background-image: url("data:image/svg+xml,%3Csvg width='96' height='96' viewBox='0 0 96 96' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b8975a' stroke-opacity='.30' stroke-width='.7'%3E%3Cpath d='M48 3 61 16 80 16 80 35 93 48 80 61 80 80 61 80 48 93 35 80 16 80 16 61 3 48 16 35 16 16 35 16Z'/%3E%3Cpath d='M48 18 59 29 67 29 67 37 78 48 67 59 67 67 59 67 48 78 37 67 29 67 29 59 18 48 29 37 29 29 37 29Z'/%3E%3C/g%3E%3C/svg%3E");
     }
 
-    .top, .topbar {
-      background: linear-gradient(115deg,#073e33 0%,#0b5d4b 58%,#124f40 100%) !important;
+    /* Header */
+
+    .top,
+    .topbar {
+      background: linear-gradient(
+        115deg,
+        #073e33 0%,
+        #0b5d4b 58%,
+        #124f40 100%
+      ) !important;
+
       color: #fff !important;
       border: 0 !important;
       box-shadow: 0 8px 30px rgba(8,70,58,.14);
       position: relative;
     }
 
-    .top:after, .topbar:after {
+    .top:after,
+    .topbar:after {
       content: "";
       position: absolute;
       inset: 0;
       pointer-events: none;
       opacity: .13;
-      background-image: repeating-linear-gradient(45deg,transparent 0 22px,rgba(255,255,255,.2) 23px,transparent 24px 46px);
+
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent 0 22px,
+        rgba(255,255,255,.2) 23px,
+        transparent 24px 46px
+      );
     }
 
-    .brand, .brand b, .topbar .brand {
+    .brand,
+    .brand b,
+    .topbar .brand {
       color: #fff !important;
       position: relative;
       z-index: 1;
@@ -142,7 +169,8 @@
       color: #e7d4a5 !important;
     }
 
-    .top-actions, .top-link {
+    .top-actions,
+    .top-link {
       position: relative;
       z-index: 1;
     }
@@ -150,6 +178,8 @@
     .top-actions > span {
       color: #f7f2e6;
     }
+
+    /* Layout */
 
     .wrap {
       max-width: 1180px !important;
@@ -167,7 +197,8 @@
       color: var(--g);
     }
 
-    h2, h3 {
+    h2,
+    h3 {
       letter-spacing: -.02em;
     }
 
@@ -175,30 +206,41 @@
       letter-spacing: .02em;
     }
 
-    .card, .action-card {
+    /* Cards */
+
+    .card,
+    .action-card {
       background: var(--surface) !important;
       border: 1px solid rgba(184,151,90,.25) !important;
       border-radius: var(--radius) !important;
       box-shadow: var(--shadow) !important;
       backdrop-filter: blur(10px);
-      transition: transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+
+      transition:
+        transform .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+
       position: relative;
       overflow: hidden;
     }
 
-    .card:before, .action-card:before {
+    .card:before,
+    .action-card:before {
       content: "";
       position: absolute;
       top: 0;
       right: 22px;
       width: 54px;
       height: 3px;
+
       background: linear-gradient(90deg,var(--au),#e4d4a8);
       border-radius: 0 0 8px 8px;
       opacity: .8;
     }
 
-    .card:hover, .action-card:hover {
+    .card:hover,
+    .action-card:hover {
       box-shadow: var(--shadow-hover) !important;
       border-color: rgba(184,151,90,.48) !important;
     }
@@ -207,9 +249,84 @@
       gap: 18px !important;
     }
 
-    .btn, .btn-light, .top-link, button {
+    /* =====================================
+       ROOM ICONS
+    ===================================== */
+
+    .room-topline {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .room-icon {
+      width: 70px;
+      height: 70px;
+      flex: 0 0 70px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 21px;
+      border: 1px solid;
+
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .room-icon svg {
+      width: 34px;
+      height: 34px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .room-icon-0 {
+      color: #167653;
+      background: linear-gradient(145deg,#e0f2e7,#c5e7d3);
+      border-color: #a5d2b7;
+    }
+
+    .room-icon-1 {
+      color: #a17a30;
+      background: linear-gradient(145deg,#f8efd8,#ead8a9);
+      border-color: #dbc48c;
+    }
+
+    .room-icon-2 {
+      color: #477e88;
+      background: linear-gradient(145deg,#e0f0ef,#c4e1df);
+      border-color: #a8cfca;
+    }
+
+    .room-meta {
+      min-width: 0;
+    }
+
+    .room-meta h2 {
+      margin: 8px 0 0;
+    }
+
+    .card:hover .room-icon {
+      transform: translateY(-3px);
+    }
+
+    /* Buttons */
+
+    .btn,
+    .btn-light,
+    .top-link,
+    button {
       border-radius: 13px;
-      transition: transform .18s ease,background .18s ease,box-shadow .18s ease;
+
+      transition:
+        transform .18s ease,
+        background .18s ease,
+        box-shadow .18s ease;
     }
 
     .btn {
@@ -219,37 +336,50 @@
       font-weight: 700;
     }
 
-    .btn:hover, button:hover {
+    .btn:hover,
+    button:hover {
       transform: translateY(-1px);
       box-shadow: 0 8px 20px rgba(11,93,75,.16);
     }
 
-    .btn.light, .btn-light {
+    .btn.light,
+    .btn-light {
       background: rgba(255,255,255,.82) !important;
       color: var(--g) !important;
       border: 1px solid rgba(184,151,90,.38) !important;
       box-shadow: none;
     }
 
-    .btn.light:hover, .btn-light:hover {
+    .btn.light:hover,
+    .btn-light:hover {
       background: #f3eee0 !important;
     }
 
-    input, textarea, select {
+    /* Inputs */
+
+    input,
+    textarea,
+    select {
       border: 1px solid #ded7c5 !important;
       border-radius: 13px !important;
       background: rgba(255,255,255,.92) !important;
       color: var(--tx) !important;
       outline: none;
+
       transition: border-color .18s,box-shadow .18s;
     }
 
-    input:focus, textarea:focus, select:focus {
+    input:focus,
+    textarea:focus,
+    select:focus {
       border-color: var(--g) !important;
       box-shadow: 0 0 0 4px rgba(11,93,75,.09);
     }
 
-    .badge, .room-status {
+    /* Status */
+
+    .badge,
+    .room-status {
       background: #e7f1eb !important;
       color: #0b5d4b !important;
       border: 1px solid #d1e4d8;
@@ -260,13 +390,16 @@
       color: #9b302b !important;
     }
 
+    /* Empty state */
+
     .empty {
       background: rgba(255,255,255,.76) !important;
       border: 1px dashed rgba(184,151,90,.6) !important;
       border-radius: 18px !important;
     }
 
-    a:focus-visible, button:focus-visible {
+    a:focus-visible,
+    button:focus-visible {
       outline: 3px solid #d9bc7b;
       outline-offset: 3px;
     }
@@ -276,6 +409,310 @@
       color: #08463a;
     }
 
+    /* =====================================
+       COMPLETE DARK MODE
+    ===================================== */
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+    }
+
+    /* General background */
+
+    html[data-theme="dark"] body {
+      background:
+        radial-gradient(
+          ellipse at 0% 0%,
+          rgba(184,151,90,.09),
+          transparent 32rem
+        ),
+        radial-gradient(
+          ellipse at 100% 10%,
+          rgba(40,120,85,.10),
+          transparent 34rem
+        ),
+        #101a15 !important;
+
+      color: #e8e9df !important;
+    }
+
+    html[data-theme="dark"] body:before {
+      opacity: .12;
+    }
+
+    /* Header */
+
+    html[data-theme="dark"] .top,
+    html[data-theme="dark"] .topbar {
+      background: linear-gradient(
+        115deg,
+        #073e33,
+        #0b5d4b 58%,
+        #124f40
+      ) !important;
+
+      color: #fff !important;
+    }
+
+    /* Main headings */
+
+    html[data-theme="dark"] h1,
+    html[data-theme="dark"] h2 {
+      color: #dfc991 !important;
+    }
+
+    html[data-theme="dark"] h3 {
+      color: #e8e9df !important;
+    }
+
+    /* Main room cards */
+
+    html[data-theme="dark"] #rooms > .card,
+    html[data-theme="dark"] .admin-tools {
+      background: linear-gradient(
+        145deg,
+        #1b2b22,
+        #142019
+      ) !important;
+
+      border: 1px solid #405b49 !important;
+      color: #e8e9df !important;
+
+      box-shadow: 0 14px 38px rgba(0,0,0,.25) !important;
+    }
+
+    html[data-theme="dark"] #rooms > .card:hover,
+    html[data-theme="dark"] .admin-tools:hover {
+      border-color: #66866a !important;
+      box-shadow: 0 18px 42px rgba(0,0,0,.35) !important;
+    }
+
+    /* Golden card decoration */
+
+    html[data-theme="dark"] .card:before,
+    html[data-theme="dark"] .action-card:before {
+      background: linear-gradient(
+        90deg,
+        #b8975a,
+        #e4d4a8
+      );
+    }
+
+    /* Secondary text */
+
+    html[data-theme="dark"] .muted {
+      color: #a5b5a8 !important;
+    }
+
+    html[data-theme="dark"] .eyebrow {
+      color: #c9aa69 !important;
+    }
+
+    /* Room information */
+
+    html[data-theme="dark"] .room-topline {
+      color: #e8e9df !important;
+    }
+
+    html[data-theme="dark"] .room-meta h2 {
+      color: #e7d5a7 !important;
+    }
+
+    /* Room status: active */
+
+    html[data-theme="dark"] .room-status:not(.off),
+    html[data-theme="dark"] .badge {
+      background: #244b36 !important;
+      color: #a9e3bb !important;
+      border: 1px solid #426e50 !important;
+    }
+
+    /* Room status: inactive */
+
+    html[data-theme="dark"] .room-status.off {
+      background: #492b2b !important;
+      color: #ffb9b0 !important;
+      border: 1px solid #754343 !important;
+    }
+
+    /* Room icons */
+
+    html[data-theme="dark"] .room-icon-0 {
+      color: #83e0b2 !important;
+      background: linear-gradient(
+        145deg,
+        #194c38,
+        #235d43
+      ) !important;
+      border-color: #39835e !important;
+      box-shadow: 0 0 22px rgba(89,207,146,.12);
+    }
+
+    html[data-theme="dark"] .room-icon-1 {
+      color: #f0cd7d !important;
+      background: linear-gradient(
+        145deg,
+        #493b22,
+        #5b4928
+      ) !important;
+      border-color: #917342 !important;
+      box-shadow: 0 0 22px rgba(231,192,104,.13);
+    }
+
+    html[data-theme="dark"] .room-icon-2 {
+      color: #8bd6d5 !important;
+      background: linear-gradient(
+        145deg,
+        #1d4140,
+        #285655
+      ) !important;
+      border-color: #417c78 !important;
+      box-shadow: 0 0 22px rgba(103,205,198,.12);
+    }
+
+    html[data-theme="dark"] .card:hover .room-icon {
+      box-shadow: 0 0 26px rgba(185,154,91,.22);
+    }
+
+    /* Current nasheed inner card */
+
+    html[data-theme="dark"] #rooms > .card .card {
+      background: linear-gradient(
+        145deg,
+        #20372a,
+        #192c21
+      ) !important;
+
+      border: 1px solid #49644d !important;
+      color: #e8e9df !important;
+
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+    }
+
+    html[data-theme="dark"] #rooms > .card .card h3 {
+      color: #e7d5a7 !important;
+    }
+
+    html[data-theme="dark"] #rooms > .card .card .eyebrow {
+      color: #d0b579 !important;
+    }
+
+    /* Admin tools */
+
+    html[data-theme="dark"] .admin-tools h2 {
+      color: #e7d5a7 !important;
+    }
+
+    html[data-theme="dark"] .admin-tools p {
+      color: #b5c2b9 !important;
+    }
+
+    /* Room form */
+
+    html[data-theme="dark"] .room-form {
+      gap: 14px;
+    }
+
+    html[data-theme="dark"] .room-form input,
+    html[data-theme="dark"] .room-form textarea {
+      background: #192b21 !important;
+      color: #edf3ed !important;
+      border: 1px solid #526b58 !important;
+      border-radius: 13px !important;
+
+      box-shadow: inset 0 2px 5px rgba(0,0,0,.12) !important;
+    }
+
+    html[data-theme="dark"] .room-form input::placeholder,
+    html[data-theme="dark"] .room-form textarea::placeholder {
+      color: #899c8e !important;
+    }
+
+    html[data-theme="dark"] .room-form input:focus,
+    html[data-theme="dark"] .room-form textarea:focus {
+      background: #20382a !important;
+      border-color: #83c99b !important;
+      box-shadow: 0 0 0 4px rgba(86,185,154,.13) !important;
+    }
+
+    /* Main buttons */
+
+    html[data-theme="dark"] .btn:not(.light):not(.warning):not(.danger) {
+      background: linear-gradient(
+        135deg,
+        #267653,
+        #10513b
+      ) !important;
+
+      color: #fff !important;
+      border: 1px solid #477c5b !important;
+    }
+
+    /* Secondary buttons */
+
+    html[data-theme="dark"] .btn.light,
+    html[data-theme="dark"] .btn-light {
+      background: #203b2c !important;
+      color: #b9e4c8 !important;
+      border: 1px solid #52785b !important;
+      box-shadow: none !important;
+    }
+
+    html[data-theme="dark"] .btn.light:hover,
+    html[data-theme="dark"] .btn-light:hover {
+      background: #2b5039 !important;
+      color: #fff !important;
+    }
+
+    /* Warning button */
+
+    html[data-theme="dark"] .btn.warning {
+      background: #554321 !important;
+      color: #f2d38b !important;
+      border: 1px solid #806638 !important;
+    }
+
+    /* Danger button */
+
+    html[data-theme="dark"] .btn.danger {
+      background: #512c2c !important;
+      color: #ffc0b8 !important;
+      border: 1px solid #824747 !important;
+    }
+
+    /* Disabled buttons */
+
+    html[data-theme="dark"] button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Empty state */
+
+    html[data-theme="dark"] .empty {
+      background: #1b2b22 !important;
+      color: #c7d5ca !important;
+      border: 1px dashed #806c43 !important;
+    }
+
+    /* Selection */
+
+    html[data-theme="dark"] ::selection {
+      background: #35694b;
+      color: #fff;
+    }
+
+    /* Scrollbar */
+
+    html[data-theme="dark"] * {
+      scrollbar-color: #496b53 #15231b;
+    }
+
+    /* =====================================
+       RESPONSIVE DESIGN
+    ===================================== */
+
     @media (max-width: 700px) {
       .wrap {
         margin: 22px auto !important;
@@ -283,7 +720,8 @@
         padding-right: 14px !important;
       }
 
-      .top, .topbar {
+      .top,
+      .topbar {
         padding: 14px 16px !important;
       }
 
@@ -291,12 +729,14 @@
         gap: 8px !important;
       }
 
-      .top-actions .btn, .top-actions .top-link {
+      .top-actions .btn,
+      .top-actions .top-link {
         font-size: .88rem;
         padding: 8px 11px;
       }
 
-      .card, .action-card {
+      .card,
+      .action-card {
         border-radius: 18px !important;
         padding: 17px !important;
       }
@@ -304,10 +744,35 @@
       .page-title {
         gap: 10px;
       }
+
+      html[data-theme="dark"] #rooms > .card,
+      html[data-theme="dark"] .admin-tools {
+        border-radius: 18px !important;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .room-icon {
+        width: 58px;
+        height: 58px;
+        flex-basis: 58px;
+        border-radius: 17px;
+      }
+
+      .room-icon svg {
+        width: 29px;
+        height: 29px;
+      }
+
+      .room-topline {
+        gap: 12px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *:before, *:after {
+      *,
+      *:before,
+      *:after {
         scroll-behavior: auto !important;
         transition: none !important;
         animation: none !important;
@@ -327,7 +792,6 @@
         const ctx = await requireSession();
 
         // إذا لم توجد جلسة صالحة، انتقل إلى صفحة تسجيل الدخول.
-        // نستخدم replace حتى لا يرجع زر المتصفح إلى صفحة الغرف المحمية.
         if (!ctx || !ctx.account) {
           window.location.replace('index.html?login=1&next=rooms.html');
           return;
@@ -342,6 +806,7 @@
           `
             <section id="adminTools" class="card admin-tools" hidden>
               <h2 class="section-title">إدارة غرف الإنشاد</h2>
+
               <p class="muted">
                 أضف الغرف وعدّل بياناتها أو عطّلها وقت ما بدك.
               </p>
@@ -398,7 +863,9 @@
               .order('created_at', { ascending: true });
 
             if (error) throw error;
+
             rooms = data || [];
+
           } else {
             rooms = await getAllowedRooms(ctx.account.id);
           }
@@ -414,12 +881,14 @@
 
             if (error) {
               console.error('خطأ تحميل الأناشيد النشطة:', error);
+
               selectionError = true;
 
               toast(
                 'تعذّر تحميل الأناشيد الحالية. تحقق من صلاحيات القراءة.',
                 true
               );
+
             } else {
               selections = data || [];
             }
@@ -440,7 +909,7 @@
             return;
           }
 
-          target.innerHTML = rooms.map(r => {
+          target.innerHTML = rooms.map((r, index) => {
             const selection = selections.find(
               x => x.room_id === r.id
             );
@@ -453,19 +922,40 @@
 
             return `
               <article class="card">
-                ${isAdmin ? `
-                  <span class="room-status ${r.is_active ? '' : 'off'}">
-                    ${r.is_active ? 'الغرفة مفعّلة' : 'الغرفة معطّلة'}
-                  </span>
-                ` : `
-                  <span class="badge">
-                    ${selectionError
-                      ? 'تعذّر تحميل الحالة'
-                      : hasSelection
-                        ? 'توجد أنشودة مختارة'
-                        : 'بانتظار اختيار أنشودة'}
-                  </span>
-                `}
+
+                <div class="room-topline">
+
+                  <div
+                    class="room-icon room-icon-${index % 3}"
+                    aria-hidden="true"
+                  >
+                    <svg viewBox="0 0 24 24">
+                      <path d="M9 18V5l12-2v13"/>
+                      <circle cx="6" cy="18" r="3"/>
+                      <circle cx="18" cy="16" r="3"/>
+                    </svg>
+                  </div>
+
+                  <div class="room-meta">
+
+                    ${isAdmin ? `
+                      <span class="room-status ${r.is_active ? '' : 'off'}">
+                        ${r.is_active ? 'الغرفة مفعّلة' : 'الغرفة معطّلة'}
+                      </span>
+                    ` : `
+                      <span class="badge">
+                        ${selectionError
+                          ? 'تعذّر تحميل الحالة'
+                          : hasSelection
+                            ? 'توجد أنشودة مختارة'
+                            : 'بانتظار اختيار أنشودة'}
+                      </span>
+                    `}
+
+                    <h2>${escapeHtml(r.name)}</h2>
+
+                  </div>
+                </div>
 
                 <h2>${escapeHtml(r.name)}</h2>
 
@@ -481,6 +971,7 @@
                 </div>
 
                 <div class="room-actions">
+
                   ${r.is_active ? `
                     <a
                       class="btn"
@@ -517,6 +1008,7 @@
                       data-id="${r.id}"
                     >حذف نهائي</button>
                   ` : ''}
+
                 </div>
               </article>
             `;
@@ -559,14 +1051,19 @@
                 if (error) throw error;
 
                 e.target.reset();
+
                 toast('تمت إضافة الغرفة بنجاح.');
+
                 await loadRooms();
+
               } catch (error) {
                 console.error('خطأ إضافة الغرفة:', error);
+
                 toast(
                   'تعذّرت إضافة الغرفة: ' + error.message,
                   true
                 );
+
               } finally {
                 submitButton.disabled = false;
               }
@@ -575,6 +1072,7 @@
           // تعديل البيانات، تفعيل وتعطيل الغرفة، أو حذفها
           target.addEventListener('click', async e => {
             const button = e.target.closest('button[data-action]');
+
             if (!button) return;
 
             const room = rooms.find(
@@ -646,10 +1144,7 @@
               }
 
               if (action === 'delete') {
-                const confirmed = confirm(
-                  `تحذير: هل أنت متأكد من حذف "${room.name}" نهائيًا؟\n\n` +
-                  'سيؤدي ذلك إلى حذف صلاحيات الغرفة واختيارها الحالي وسجلّات الاختيار المرتبطة بها. لا يمكن التراجع عن هذا الحذف.'
-                );
+               
 
                 if (!confirmed) return;
 
@@ -661,14 +1156,18 @@
                 if (error) throw error;
 
                 toast('تم حذف الغرفة نهائيًا.');
+
                 await loadRooms();
               }
+
             } catch (error) {
               console.error('خطأ إدارة الغرفة:', error);
+
               toast(
                 'تعذّر تنفيذ العملية: ' + error.message,
                 true
               );
+
             } finally {
               button.disabled = false;
             }
@@ -680,9 +1179,9 @@
       } catch (e) {
         console.error('خطأ صفحة الغرف:', e);
 
-        // إذا فشل التحقق من الجلسة، ارجع لتسجيل الدخول بدل رسالة الجلسة.
-        // لا نحوّل عند كل خطأ شبكي أو خطأ صلاحيات؛ حتى لا نخفي الخطأ الحقيقي.
+        // إذا فشل التحقق من الجلسة، ارجع لتسجيل الدخول.
         const message = String(e?.message || '').toLowerCase();
+
         const sessionError =
           message.includes('session') ||
           message.includes('جلسة') ||

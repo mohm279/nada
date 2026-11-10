@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -8,91 +9,612 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="shared.js"></script>
-<style id="nada-geometric-heritage">
 
-/* NADA Geometric Heritage — visual layer only */
+<style id="nada-geometric-heritage">
 :root{
   --g:#0b5d4b;--g2:#08463a;--iv:#fbf8ef;--au:#b8975a;
   --tx:#1d2b27;--mu:#64756f;--bd:#e6dfcc;
   --surface:rgba(255,255,255,.88);--shadow:0 14px 40px rgba(8,70,58,.09);
   --shadow-hover:0 20px 48px rgba(8,70,58,.15);--radius:22px;
 }
+
 html{scroll-behavior:smooth}
+
 body{
   background:
     radial-gradient(ellipse at 0% 0%,rgba(184,151,90,.10),transparent 32rem),
     radial-gradient(ellipse at 100% 10%,rgba(11,93,75,.09),transparent 34rem),
     var(--iv)!important;
-  color:var(--tx);font-family:"Cairo",Tahoma,Arial,sans-serif;
+  color:var(--tx);
+  font-family:"Cairo",Tahoma,Arial,sans-serif;
 }
+
 body:before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.20;
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.20;
   background-image:url("data:image/svg+xml,%3Csvg width='96' height='96' viewBox='0 0 96 96' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b8975a' stroke-opacity='.30' stroke-width='.7'%3E%3Cpath d='M48 3 61 16 80 16 80 35 93 48 80 61 80 80 61 80 48 93 35 80 16 80 16 61 3 48 16 35 16 16 35 16Z'/%3E%3Cpath d='M48 18 59 29 67 29 67 37 78 48 67 59 67 67 59 67 48 78 37 67 29 67 29 59 18 48 29 37 29 29 37 29Z'/%3E%3C/g%3E%3C/svg%3E");
 }
-.top, .topbar{
+
+.top,.topbar{
   background:linear-gradient(115deg,#073e33 0%,#0b5d4b 58%,#124f40 100%)!important;
-  color:#fff!important;border:0!important;box-shadow:0 8px 30px rgba(8,70,58,.14);
+  color:#fff!important;
+  border:0!important;
+  box-shadow:0 8px 30px rgba(8,70,58,.14);
   position:relative;
 }
+
 .top:after,.topbar:after{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.13;
   background-image:repeating-linear-gradient(45deg,transparent 0 22px,rgba(255,255,255,.2) 23px,transparent 24px 46px);
 }
-.brand,.brand b,.topbar .brand{color:#fff!important;position:relative;z-index:1}
+
+.brand,.brand b,.topbar .brand{
+  color:#fff!important;
+  position:relative;
+  z-index:1
+}
+
 .brand small{color:#e7d4a5!important}
-.top-actions,.top-link{position:relative;z-index:1}
+
+.top-actions,.top-link{
+  position:relative;
+  z-index:1
+}
+
 .top-actions>span{color:#f7f2e6}
-.wrap{max-width:1180px!important;margin:34px auto!important;padding-left:22px!important;padding-right:22px!important}
+
+.wrap{
+  max-width:1180px!important;
+  margin:34px auto!important;
+  padding-left:22px!important;
+  padding-right:22px!important
+}
+
 .page-title{margin-bottom:26px!important}
-h1{letter-spacing:-.035em;color:var(--g)}
+
+h1{
+  letter-spacing:-.035em;
+  color:var(--g)
+}
+
 h2,h3{letter-spacing:-.02em}
+
 .eyebrow{letter-spacing:.02em}
+
 .card,.action-card{
-  background:var(--surface)!important;border:1px solid rgba(184,151,90,.25)!important;
-  border-radius:var(--radius)!important;box-shadow:var(--shadow)!important;
-  backdrop-filter:blur(10px);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
-  position:relative;overflow:hidden;
+  background:var(--surface)!important;
+  border:1px solid rgba(184,151,90,.25)!important;
+  border-radius:var(--radius)!important;
+  box-shadow:var(--shadow)!important;
+  backdrop-filter:blur(10px);
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+  position:relative;
+  overflow:hidden;
 }
+
 .card:before,.action-card:before{
-  content:"";position:absolute;top:0;right:22px;width:54px;height:3px;
-  background:linear-gradient(90deg,var(--au),#e4d4a8);border-radius:0 0 8px 8px;opacity:.8;
+  content:"";
+  position:absolute;
+  top:0;
+  right:22px;
+  width:54px;
+  height:3px;
+  background:linear-gradient(90deg,var(--au),#e4d4a8);
+  border-radius:0 0 8px 8px;
+  opacity:.8;
 }
-.card:hover,.action-card:hover{box-shadow:var(--shadow-hover)!important;border-color:rgba(184,151,90,.48)!important}
+
+.card:hover,.action-card:hover{
+  box-shadow:var(--shadow-hover)!important;
+  border-color:rgba(184,151,90,.48)!important
+}
+
 .grid{gap:18px!important}
+
 .btn,.btn-light,.top-link,button{
-  border-radius:13px;transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+  border-radius:13px;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
 }
+
 .btn{
-  background:linear-gradient(135deg,var(--g),var(--g2))!important;color:#fff!important;
-  box-shadow:0 5px 13px rgba(11,93,75,.14);font-weight:700;
+  background:linear-gradient(135deg,var(--g),var(--g2))!important;
+  color:#fff!important;
+  box-shadow:0 5px 13px rgba(11,93,75,.14);
+  font-weight:700;
 }
-.btn:hover,button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(11,93,75,.16)}
+
+.btn:hover,button:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(11,93,75,.16)
+}
+
 .btn.light,.btn-light{
-  background:rgba(255,255,255,.82)!important;color:var(--g)!important;
-  border:1px solid rgba(184,151,90,.38)!important;box-shadow:none;
+  background:rgba(255,255,255,.82)!important;
+  color:var(--g)!important;
+  border:1px solid rgba(184,151,90,.38)!important;
+  box-shadow:none;
 }
-.btn.light:hover,.btn-light:hover{background:#f3eee0!important}
+
+.btn.light:hover,.btn-light:hover{
+  background:#f3eee0!important
+}
+
 input,textarea,select{
-  border:1px solid #ded7c5!important;border-radius:13px!important;background:rgba(255,255,255,.92)!important;
-  color:var(--tx)!important;outline:none;transition:border-color .18s,box-shadow .18s;
+  border:1px solid #ded7c5!important;
+  border-radius:13px!important;
+  background:rgba(255,255,255,.92)!important;
+  color:var(--tx)!important;
+  outline:none;
+  transition:border-color .18s,box-shadow .18s;
 }
-input:focus,textarea:focus,select:focus{border-color:var(--g)!important;box-shadow:0 0 0 4px rgba(11,93,75,.09)}
-.badge,.room-status{background:#e7f1eb!important;color:#0b5d4b!important;border:1px solid #d1e4d8}
-.empty{background:rgba(255,255,255,.76)!important;border:1px dashed rgba(184,151,90,.6)!important;border-radius:18px!important}
-.lyrics{background:rgba(255,255,255,.88)!important;border:1px solid rgba(184,151,90,.28)!important;border-radius:22px!important;box-shadow:var(--shadow);padding:clamp(20px,4vw,34px)!important}
-.toast{box-shadow:0 12px 32px rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.25)}
-a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3px}
-::selection{background:#d9e9df;color:#08463a}
+
+input:focus,textarea:focus,select:focus{
+  border-color:var(--g)!important;
+  box-shadow:0 0 0 4px rgba(11,93,75,.09)
+}
+
+.badge,.room-status{
+  background:#e7f1eb!important;
+  color:#0b5d4b!important;
+  border:1px solid #d1e4d8
+}
+
+.empty{
+  background:rgba(255,255,255,.76)!important;
+  border:1px dashed rgba(184,151,90,.6)!important;
+  border-radius:18px!important
+}
+
+/* معلومات الأنشودة واسم الكاتب */
+
+.nasheed-meta{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px 22px;
+  margin:0 0 18px;
+}
+
+.nasheed-meta p{
+  margin:0;
+  font-size:.95rem;
+  line-height:1.8;
+}
+
+.nasheed-meta strong{
+  color:var(--g);
+  font-weight:800;
+}
+
+.nasheed-meta [hidden]{
+  display:none!important;
+}
+
+html[data-theme="dark"] .nasheed-meta strong{
+  color:#dfc991!important;
+}
+
+/* =====================================
+   LYRICS - IMPROVED READING
+===================================== */
+
+.lyrics{
+  background:rgba(255,255,255,.88)!important;
+  color:var(--tx);
+  border:1px solid rgba(184,151,90,.28)!important;
+  border-radius:22px!important;
+  box-shadow:var(--shadow);
+  padding:clamp(24px,5vw,42px)!important;
+  direction:rtl;
+  text-align:center;
+  unicode-bidi:plaintext;
+  white-space:pre-wrap;
+  line-height:2.15;
+  word-break:normal;
+  overflow-wrap:anywhere;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:22px auto;
+  font-weight:600;
+  letter-spacing:0;
+  text-shadow:none;
+  text-wrap:pretty;
+}
+
+/* LYRICS FONT SIZE SETTINGS */
+
+.font-size-card{
+  display:block;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:18px 0;
+  padding:18px!important;
+}
+
+.font-size-control{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  box-sizing:border-box;
+}
+
+.font-size-control button{
+  flex:1 1 0;
+  min-width:0;
+  height:44px;
+  border:1px solid var(--au);
+  background:rgba(255,255,255,.8);
+  color:var(--g);
+  font-weight:800;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:1rem;
+}
+
+.font-size-control .font-size-value{
+  flex:0 0 65px;
+  min-width:65px;
+  text-align:center;
+  font-weight:800;
+  font-size:1.05rem;
+}
+
+.font-size-control #resetFont{
+  flex:1.4 1 0;
+}
+
+html[data-theme="dark"] .font-size-control button{
+  background:#203b2c;
+  color:#b9e4c8;
+  border-color:#52785b;
+}
+
+/* Toast */
+
+.toast{
+  box-shadow:0 12px 32px rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.25)
+}
+
+a:focus-visible,button:focus-visible{
+  outline:3px solid #d9bc7b;
+  outline-offset:3px
+}
+
+::selection{
+  background:#d9e9df;
+  color:#08463a
+}
+
+/* DARK MODE */
+
+html[data-theme="dark"]{
+  color-scheme:dark;
+}
+
+html[data-theme="dark"] body{
+  background:
+    radial-gradient(ellipse at 0% 0%,rgba(184,151,90,.09),transparent 32rem),
+    radial-gradient(ellipse at 100% 10%,rgba(40,120,85,.10),transparent 34rem),
+    #101a15!important;
+  color:#e8e9df!important;
+}
+
+html[data-theme="dark"] body:before{opacity:.12}
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2{
+  color:#dfc991!important;
+}
+
+html[data-theme="dark"] h3{color:#e8e9df!important}
+
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .action-card{
+  background:linear-gradient(145deg,#1b2b22,#142019)!important;
+  border:1px solid #405b49!important;
+  color:#e8e9df!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.25)!important;
+}
+
+html[data-theme="dark"] .card:hover,
+html[data-theme="dark"] .action-card:hover{
+  border-color:#66866a!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.35)!important;
+}
+
+html[data-theme="dark"] .card:before,
+html[data-theme="dark"] .action-card:before{
+  background:linear-gradient(90deg,#b8975a,#e4d4a8);
+}
+
+html[data-theme="dark"] .muted{color:#a5b5a8!important}
+html[data-theme="dark"] .eyebrow{color:#c9aa69!important}
+
+/* DARK MODE - LYRICS */
+
+html[data-theme="dark"] article#lyrics,
+html[data-theme="dark"] .lyrics{
+  background:linear-gradient(145deg,#1b3024,#16271e)!important;
+  color:#eee9d9!important;
+  border:1px solid #49644d!important;
+  border-radius:22px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 14px 38px rgba(0,0,0,.25)!important;
+  text-shadow:none!important;
+  direction:rtl;
+  text-align:center;
+  unicode-bidi:plaintext;
+  white-space:pre-wrap;
+  line-height:2.15!important;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+html[data-theme="dark"] article#lyrics::selection,
+html[data-theme="dark"] .lyrics::selection{
+  background:#35694b!important;
+  color:#fff!important;
+}
+
+/* الأزرار */
+
+html[data-theme="dark"] .btn:not(.light):not(.warning):not(.danger){
+  background:linear-gradient(135deg,#267653,#10513b)!important;
+  color:#fff!important;
+  border:1px solid #477c5b!important;
+}
+
+html[data-theme="dark"] .btn.light,
+html[data-theme="dark"] .btn-light{
+  background:#203b2c!important;
+  color:#b9e4c8!important;
+  border:1px solid #52785b!important;
+  box-shadow:none!important;
+}
+
+html[data-theme="dark"] .btn.light:hover,
+html[data-theme="dark"] .btn-light:hover{
+  background:#2b5039!important;
+  color:#fff!important;
+}
+
+/* حقول الإدخال */
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select{
+  background:#192b21!important;
+  color:#edf3ed!important;
+  border:1px solid #526b58!important;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{
+  color:#899c8e!important;
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] select:focus{
+  background:#20382a!important;
+  border-color:#83c99b!important;
+  box-shadow:0 0 0 4px rgba(86,185,154,.13)!important;
+}
+
+/* الحالات */
+
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] .room-status{
+  background:#244b36!important;
+  color:#a9e3bb!important;
+  border:1px solid #426e50!important;
+}
+
+html[data-theme="dark"] .room-status.off{
+  background:#492b2b!important;
+  color:#ffb9b0!important;
+  border-color:#754343!important;
+}
+
+html[data-theme="dark"] .empty{
+  background:#1b2b22!important;
+  color:#c7d5ca!important;
+  border:1px dashed #806c43!important;
+}
+
+html[data-theme="dark"] ::selection{
+  background:#35694b;
+  color:#fff;
+}
+
+html[data-theme="dark"] *{
+  scrollbar-color:#496b53 #15231b;
+}
+
+/* RECOMMENDATIONS */
+
+.recommendations{
+  margin-top:26px;
+  padding:22px
+}
+
+.recommendations-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px
+}
+
+.recommendations-head h2{
+  margin:0;
+  color:var(--g);
+  font-size:1.2rem
+}
+
+.recommendations-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px
+}
+
+.recommendation-item{
+  display:block;
+  text-decoration:none;
+  color:var(--tx);
+  background:rgba(251,248,239,.72);
+  border:1px solid rgba(184,151,90,.28);
+  border-radius:15px;
+  padding:14px;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease
+}
+
+.recommendation-item:hover{
+  transform:translateY(-2px);
+  border-color:var(--au);
+  box-shadow:0 8px 20px rgba(8,70,58,.08)
+}
+
+.recommendation-title{
+  font-weight:800;
+  color:var(--g2);
+  margin-bottom:7px
+}
+
+.recommendation-meta{
+  font-size:.84rem;
+  color:var(--mu);
+  line-height:1.8
+}
+
+.recommendation-reasons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:9px
+}
+
+.recommendation-tag{
+  font-size:.75rem;
+  padding:3px 8px;
+  border-radius:20px;
+  background:#e7f1eb;
+  color:#0b5d4b
+}
+
+.recommendations-empty{
+  color:var(--mu);
+  font-size:.92rem;
+  padding:10px 2px
+}
+
+/* الاقتراحات - الوضع الليلي */
+
+html[data-theme="dark"] .recommendations-head h2{
+  color:#dfc991!important;
+}
+
+html[data-theme="dark"] .recommendation-item{
+  background:#192b21!important;
+  color:#e8e9df!important;
+  border:1px solid #405b49!important;
+}
+
+html[data-theme="dark"] .recommendation-item:hover{
+  background:#20382a!important;
+  border-color:#b8975a!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.22)!important;
+}
+
+html[data-theme="dark"] .recommendation-title{
+  color:#e7d5a7!important;
+}
+
+html[data-theme="dark"] .recommendation-meta{
+  color:#a5b5a8!important;
+}
+
+html[data-theme="dark"] .recommendation-tag{
+  background:#244b36!important;
+  color:#a9e3bb!important;
+  border:1px solid #426e50;
+}
+
+html[data-theme="dark"] .recommendations-empty{
+  color:#a5b5a8!important;
+}
+
+/* RESPONSIVE */
+
 @media(max-width:700px){
-  .wrap{margin:22px auto!important;padding-left:14px!important;padding-right:14px!important}
+  .wrap{
+    margin:22px auto!important;
+    padding-left:14px!important;
+    padding-right:14px!important
+  }
+
   .top,.topbar{padding:14px 16px!important}
   .top-actions{gap:8px!important}
-  .top-actions .btn,.top-actions .top-link{font-size:.88rem;padding:8px 11px}
-  .card,.action-card{border-radius:18px!important;padding:17px!important}
+
+  .top-actions .btn,.top-actions .top-link{
+    font-size:.88rem;
+    padding:8px 11px
+  }
+
+  .card,.action-card{
+    border-radius:18px!important;
+    padding:17px!important
+  }
+
   .page-title{gap:10px}
 }
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+@media(max-width:600px){
+  .recommendations{padding:17px}
+  .recommendations-list{grid-template-columns:1fr}
+
+  .font-size-card{padding:14px!important}
+  .font-size-control{gap:7px}
+
+  .font-size-control button{
+    height:42px;
+    font-size:.9rem;
+  }
+
+  .font-size-control .font-size-value{
+    flex-basis:42px;
+    min-width:42px;
+  }
+
+  .lyrics{
+    padding:20px 15px!important;
+    line-height:2.1;
+    border-radius:17px!important;
+    margin:16px auto;
+  }
+
+  html[data-theme="dark"] .lyrics{
+    line-height:2.1!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    scroll-behavior:auto!important;
+    transition:none!important;
+    animation:none!important
+  }
+}
 </style>
 </head>
 
@@ -103,13 +625,13 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
   (async () => {
     let ctx = null;
 
-const { data: { session } } = await db.auth.getSession();
+    const { data: { session } } = await db.auth.getSession();
 
-if (session) {
-  ctx = await requireSession();
-}
+    if (session) {
+      ctx = await requireSession();
+    }
 
-const id = new URLSearchParams(location.search).get('id');
+    const id = new URLSearchParams(location.search).get('id');
 
     if (!id) {
       location.replace('library.html');
@@ -129,17 +651,49 @@ const id = new URLSearchParams(location.search).get('id');
       return;
     }
 
-const room = ctx ? selectedRoomId() : null;
-const isAdmin = ctx?.account?.role === 'admin';
-const isLeader = ctx?.account?.role === 'leader';
+    const room = ctx ? selectedRoomId() : null;
+    const isAdmin = ctx?.account?.role === 'admin';
+    const isLeader = ctx?.account?.role === 'leader';
 
     document.getElementById('app').innerHTML =
       styles() +
       commonHeader(n.title, ctx?.account || null) +
       `
-      <p class="muted" id="category">${escapeHtml(n.category || 'بدون تصنيف')}</p>
+      <div class="nasheed-meta">
+        <p class="muted" id="category">
+          ${escapeHtml(n.category || 'بدون تصنيف')}
+        </p>
+
+        <p class="muted" id="poetInfo" ${n.poet_name ? '' : 'hidden'}>
+          <span>✍️ الكاتب:</span>
+          <strong id="poetNameDisplay">${escapeHtml(n.poet_name || '')}</strong>
+        </p>
+      </div>
+
+      <section class="card font-size-card">
+        <div class="font-size-control">
+          <button type="button" id="decreaseFont" aria-label="تصغير الخط">−</button>
+
+          <span class="font-size-value" id="fontSizeValue">19</span>
+
+          <button type="button" id="increaseFont" aria-label="تكبير الخط">+</button>
+
+          <button type="button" id="resetFont" class="btn light">
+            افتراضي
+          </button>
+        </div>
+      </section>
 
       <article id="lyrics" class="lyrics"></article>
+
+      <section id="recommendations" class="card recommendations" aria-labelledby="recommendationsTitle">
+        <div class="recommendations-head">
+          <h2 id="recommendationsTitle">أناشيد قد تعجبك</h2>
+        </div>
+        <div id="recommendationsList" class="recommendations-list">
+          <p class="recommendations-empty">جارٍ البحث عن أناشيد مشابهة...</p>
+        </div>
+      </section>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
         <button class="btn light" id="copy" type="button">نسخ الكلمات</button>
@@ -169,6 +723,13 @@ const isLeader = ctx?.account?.role === 'leader';
             <label for="editCategory">التصنيف</label>
             <input id="editCategory" maxlength="150">
 
+            <label for="editPoet">اسم الكاتب</label>
+            <input
+              id="editPoet"
+              maxlength="200"
+              placeholder="اكتب اسم الكاتب (اختياري)"
+            >
+
             <label for="editContent">كلمات الأنشودة</label>
             <textarea id="editContent" required></textarea>
 
@@ -183,6 +744,277 @@ const isLeader = ctx?.account?.role === 'leader';
       </main>`;
 
     document.getElementById('lyrics').textContent = n.content || '';
+
+    // =====================================
+    // LYRICS FONT SIZE SETTINGS
+    // =====================================
+
+    const lyricsElement = document.getElementById('lyrics');
+    const fontSizeValue = document.getElementById('fontSizeValue');
+
+    const decreaseFont = document.getElementById('decreaseFont');
+    const increaseFont = document.getElementById('increaseFont');
+    const resetFont = document.getElementById('resetFont');
+
+    const DEFAULT_SIZE = 19;
+    const MIN_FONT_SIZE = 16;
+    const MAX_FONT_SIZE = 34;
+    const FONT_STEP = 2;
+
+    let lyricsSize = DEFAULT_SIZE;
+
+    try {
+      const savedSize = Number(localStorage.getItem('nada-lyrics-size'));
+
+      if (
+        Number.isInteger(savedSize) &&
+        savedSize >= MIN_FONT_SIZE &&
+        savedSize <= MAX_FONT_SIZE
+      ) {
+        lyricsSize = savedSize;
+      }
+    } catch (error) {
+      console.warn('تعذّر تحميل حجم الخط:', error);
+    }
+
+    function applyLyricsSettings() {
+      lyricsElement.style.fontSize = `${lyricsSize}px`;
+      fontSizeValue.textContent = lyricsSize;
+
+      try {
+        localStorage.setItem('nada-lyrics-size', String(lyricsSize));
+      } catch (error) {
+        console.warn('تعذّر حفظ حجم الخط:', error);
+      }
+    }
+
+    increaseFont.addEventListener('click', () => {
+      if (lyricsSize < MAX_FONT_SIZE) {
+        lyricsSize = Math.min(MAX_FONT_SIZE, lyricsSize + FONT_STEP);
+        applyLyricsSettings();
+      }
+    });
+
+    decreaseFont.addEventListener('click', () => {
+      if (lyricsSize > MIN_FONT_SIZE) {
+        lyricsSize = Math.max(MIN_FONT_SIZE, lyricsSize - FONT_STEP);
+        applyLyricsSettings();
+      }
+    });
+
+    resetFont.addEventListener('click', () => {
+      lyricsSize = DEFAULT_SIZE;
+      applyLyricsSettings();
+      toast('تمت استعادة حجم الخط الافتراضي');
+    });
+
+    applyLyricsSettings();
+
+    // =====================================
+    // RECOMMENDATIONS
+    // =====================================
+
+    const normalizeRecommendationText = (value) => String(value || '')
+      .toLowerCase()
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+      .replace(/[إأآٱ]/g, 'ا')
+      .replace(/ى/g, 'ي')
+      .replace(/ة/g, 'ه')
+      .replace(/[^\u0621-\u064A0-9a-z\s]/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const recommendationStopWords = new Set([
+      'في','من','على','عن','الى','إلى','يا','هو','هي','هم','هن','ما','لا','لم','لن',
+      'قد','كل','كان','كانت','هذا','هذه','ذلك','تلك','انا','انت','انتم','نحن',
+      'مع','بين','ثم','او','و','ف','ب','ل','ك','له','لها','به','بها',
+      'الذي','التي','الذين','اللذي','اللي','إن','ان','أن','اذا','إذا',
+      'ربي','الله','ياالله','اللهم'
+    ]);
+
+    const getRecommendationWords = (value) => {
+      const normalized = normalizeRecommendationText(value);
+
+      return new Set(
+        normalized.split(' ').filter(word =>
+          word.length >= 3 && !recommendationStopWords.has(word)
+        )
+      );
+    };
+
+    const getWordSimilarity = (first, second) => {
+      if (!first.size || !second.size) {
+        return { overlap: 0, similarity: 0 };
+      }
+
+      let overlap = 0;
+
+      for (const word of first) {
+        if (second.has(word)) overlap++;
+      }
+
+      const similarity = (2 * overlap) / (first.size + second.size);
+
+      return { overlap, similarity };
+    };
+
+    const loadRecommendations = async () => {
+      const list = document.getElementById('recommendationsList');
+      if (!list) return;
+
+      try {
+        const { data: allSongs, error } = await db
+          .from('anasheed')
+          .select('id,title,category,content')
+          .limit(1000);
+
+        if (error) throw error;
+
+        const arabicCollator = new Intl.Collator('ar', {
+          numeric: true,
+          sensitivity: 'base'
+        });
+
+        const sortedSongs = [...(allSongs || [])].sort((a, b) =>
+          arabicCollator.compare(
+            String(a.title || ''),
+            String(b.title || '')
+          )
+        );
+
+        const currentIndex = sortedSongs.findIndex(
+          song => String(song.id) === String(id)
+        );
+
+        const nextSong = currentIndex >= 0
+          ? sortedSongs[currentIndex + 1] || null
+          : null;
+
+        const candidates = sortedSongs.filter(song =>
+          String(song.id) !== String(id) &&
+          (!nextSong || String(song.id) !== String(nextSong.id))
+        );
+
+        const currentCategory = normalizeRecommendationText(
+          n.category || ''
+        );
+
+        const currentWords = getRecommendationWords(
+          n.content || ''
+        );
+
+        const ranked = candidates
+          .map(candidate => {
+            const candidateCategory = normalizeRecommendationText(
+              candidate.category || ''
+            );
+
+            const sameCategory = Boolean(
+              currentCategory &&
+              candidateCategory &&
+              currentCategory === candidateCategory
+            );
+
+            const wordMatch = getWordSimilarity(
+              currentWords,
+              getRecommendationWords(candidate.content || '')
+            );
+
+            if (!sameCategory && wordMatch.overlap === 0) {
+              return null;
+            }
+
+            const tier =
+              sameCategory && wordMatch.overlap > 0 ? 3 :
+              sameCategory ? 2 : 1;
+
+            return {
+              ...candidate,
+              sameCategory,
+              overlap: wordMatch.overlap,
+              similarity: wordMatch.similarity,
+              tier
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) =>
+            b.tier - a.tier ||
+            b.similarity - a.similarity ||
+            b.overlap - a.overlap ||
+            arabicCollator.compare(
+              String(a.title || ''),
+              String(b.title || '')
+            )
+          );
+
+        const recommendations = [
+          ...(nextSong ? [{ ...nextSong, isNextInLibrary: true }] : []),
+          ...ranked.slice(0, nextSong ? 4 : 5)
+        ].slice(0, 5);
+
+        if (!recommendations.length) {
+          list.innerHTML =
+            '<p class="recommendations-empty">لا توجد أناشيد مشابهة حاليًا.</p>';
+          return;
+        }
+
+        list.innerHTML = recommendations.map(item => {
+          const reasons = [];
+
+          if (item.isNextInLibrary) {
+            reasons.push(
+              '<span class="recommendation-tag">التالي في الفهرس العام</span>'
+            );
+          }
+
+          if (item.sameCategory) {
+            reasons.push(
+              '<span class="recommendation-tag">نفس المقام / التصنيف</span>'
+            );
+          }
+
+          if (item.overlap > 0) {
+            reasons.push(
+              '<span class="recommendation-tag">كلمات متشابهة</span>'
+            );
+          }
+
+          const categoryText = item.category
+            ? escapeHtml(item.category)
+            : 'بدون تصنيف';
+
+          return `
+            <a class="recommendation-item"
+               href="nasheed.html?id=${encodeURIComponent(item.id)}${room ? '&room=' + encodeURIComponent(room) : ''}">
+
+              <div class="recommendation-title">
+                ${escapeHtml(item.title || 'أنشودة بدون عنوان')}
+              </div>
+
+              <div class="recommendation-meta">
+                ${categoryText}
+              </div>
+
+              <div class="recommendation-reasons">
+                ${reasons.join('')}
+              </div>
+
+            </a>
+          `;
+        }).join('');
+
+      } catch (recommendationError) {
+        console.error(
+          'خطأ تحميل الأناشيد المقترحة:',
+          recommendationError
+        );
+
+        list.innerHTML =
+          '<p class="recommendations-empty">تعذّر تحميل الاقتراحات حاليًا.</p>';
+      }
+    };
+
+    await loadRecommendations();
 
     // نسخ الكلمات
     document.getElementById('copy').onclick = async () => {
@@ -200,10 +1032,10 @@ const isLeader = ctx?.account?.role === 'leader';
       const editBox = document.getElementById('editBox');
       const editForm = document.getElementById('editForm');
 
-      // فتح نموذج التعديل
       document.getElementById('edit').onclick = () => {
         document.getElementById('editTitle').value = n.title || '';
         document.getElementById('editCategory').value = n.category || '';
+        document.getElementById('editPoet').value = n.poet_name || '';
         document.getElementById('editContent').value = n.content || '';
 
         editBox.hidden = false;
@@ -213,19 +1045,18 @@ const isLeader = ctx?.account?.role === 'leader';
         });
       };
 
-      // إلغاء التعديل
       document.getElementById('cancelEdit').onclick = () => {
         editBox.hidden = true;
         editForm.reset();
       };
 
-      // حفظ التعديلات
       editForm.onsubmit = async (e) => {
         e.preventDefault();
 
         const btn = document.getElementById('saveEdit');
         const title = document.getElementById('editTitle').value.trim();
         const category = document.getElementById('editCategory').value.trim();
+        const poetName = document.getElementById('editPoet').value.trim();
         const content = document.getElementById('editContent').value.trim();
 
         if (!title || !content) {
@@ -241,6 +1072,7 @@ const isLeader = ctx?.account?.role === 'leader';
             .update({
               title,
               category: category || null,
+              poet_name: poetName || null,
               content,
               updated_at: new Date().toISOString()
             })
@@ -255,6 +1087,7 @@ const isLeader = ctx?.account?.role === 'leader';
 
           n.title = title;
           n.category = category || null;
+          n.poet_name = poetName || null;
           n.content = content;
 
           const pageTitle = document.querySelector('.page-title h1');
@@ -263,21 +1096,33 @@ const isLeader = ctx?.account?.role === 'leader';
           document.getElementById('category').textContent =
             category || 'بدون تصنيف';
 
+          const poetInfo = document.getElementById('poetInfo');
+          const poetNameDisplay = document.getElementById('poetNameDisplay');
+
+          if (n.poet_name) {
+            poetNameDisplay.textContent = n.poet_name;
+            poetInfo.hidden = false;
+          } else {
+            poetNameDisplay.textContent = '';
+            poetInfo.hidden = true;
+          }
+
           document.getElementById('lyrics').textContent = content;
           document.title = title + ' | نَدى';
 
           editBox.hidden = true;
           toast('تم حفظ التعديلات بنجاح');
+
         } catch (err) {
           console.error('خطأ تعديل الأنشودة:', err);
           toast('تعذّر التعديل؛ تحقق من صلاحيات المدير وسياسات قاعدة البيانات.', true);
+
         } finally {
           btn.disabled = false;
         }
       };
 
       // حذف الأنشودة دون رسالة تأكيد
-      // يمنع حذف أنشودة معتمدة في أي غرفة
       document.getElementById('delete').onclick = async () => {
         const btn = document.getElementById('delete');
         btn.disabled = true;
@@ -325,13 +1170,14 @@ const isLeader = ctx?.account?.role === 'leader';
             'تعذّر الحذف. افتح Console لمعرفة الخطأ؛ قد تكون المشكلة من الصلاحيات أو ارتباط الأنشودة بسجلات أخرى.',
             true
           );
+
         } finally {
           btn.disabled = false;
         }
       };
     }
 
-    // اعتماد الأنشودة للقائد والمدير عند وجود غرفة مختارة
+    // اعتماد الأنشودة للقائد والمدير
     const s = document.getElementById('select');
 
     if (s) {
@@ -354,12 +1200,15 @@ const isLeader = ctx?.account?.role === 'leader';
               'لم يتم الاعتماد. تحقق من صلاحيات الحساب ودالة قاعدة البيانات.',
               true
             );
+
           } else {
             toast('تم اعتماد الأنشودة بنجاح');
           }
+
         } catch (e) {
           console.error('خطأ غير متوقع أثناء الاعتماد:', e);
           toast('حدث خطأ أثناء اعتماد الأنشودة.', true);
+
         } finally {
           s.disabled = false;
           s.textContent = 'اعتماد الأنشودة للفرقة';

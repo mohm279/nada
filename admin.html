@@ -101,6 +101,8 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
 <div id="app">جارٍ تحميل لوحة المدير...</div>
 
 <script>
+
+
 (async () => {
   const app = document.getElementById('app');
 
@@ -118,6 +120,23 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
     }
 
     const roomId = selectedRoomId();
+
+    // قسم اقتراحات الأناشيد
+    const suggestionsSection = `
+      <section class="card" id="suggestionsSection" style="margin-top:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <h2 style="margin-bottom:5px">اقتراحات الأناشيد</h2>
+            <p class="muted">راجع الأناشيد المقترحة واعتمد المناسب منها لنشره في الفهرس العام.</p>
+          </div>
+          <span class="badge" id="suggestionsCount">جارٍ التحميل...</span>
+        </div>
+
+        <div id="suggestionsList" style="margin-top:18px">
+          <div class="empty">جارٍ تحميل الاقتراحات...</div>
+        </div>
+      </section>
+    `;
 
     // لوحة الإدارة العامة عند عدم اختيار غرفة
     if (!roomId) {
@@ -154,9 +173,13 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
             </form>
           </section>
         </div>
+
+        ${suggestionsSection}
         </main>`;
 
       setupAddForm();
+      await loadSuggestions();
+      setupSuggestionActions();
       return;
     }
 
@@ -224,9 +247,11 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           </form>
         </section>
       </div>
+
+      ${suggestionsSection}
       </main>`;
 
-    // إضافة أنشودة ومعالجة العناوين المكررة
+    // إضافة أنشودة مباشرة من المدير
     function setupAddForm() {
       const form = document.getElementById('add');
       if (!form) return;
@@ -257,12 +282,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           });
 
           if (error) {
-            console.error('تفاصيل خطأ إضافة الأنشودة:', {
-              code: error.code,
-              message: error.message,
-              details: error.details,
-              hint: error.hint
-            });
+            console.error('تفاصيل خطأ إضافة الأنشودة:', error);
 
             const errorText = [
               error.message,
@@ -274,17 +294,11 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
               error.code === '23505' ||
               errorText.includes('anasheed_title_normalized_unique')
             ) {
-              toast(
-                '⚠️ هذه الأنشودة موجودة مسبقًا، لم تتم إضافتها.',
-                true
-              );
+              toast('⚠️ هذه الأنشودة موجودة مسبقًا، لم تتم إضافتها.', true);
               return;
             }
 
-            toast(
-              'فشل الحفظ: ' + (error.message || 'خطأ غير معروف'),
-              true
-            );
+            toast('فشل الحفظ: ' + (error.message || 'خطأ غير معروف'), true);
             return;
           }
 
@@ -292,17 +306,153 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           toast('تم حفظ الأنشودة بنجاح');
         } catch (error) {
           console.error('خطأ إضافة الأنشودة:', error);
-
-          toast(
-            'فشل الحفظ: ' + (error?.message || 'خطأ غير معروف'),
-            true
-          );
+          toast('فشل الحفظ: ' + (error?.message || 'خطأ غير معروف'), true);
         } finally {
           btn.disabled = false;
         }
       };
     }
 
+    // تحميل الاقتراحات التي تنتظر المراجعة
+    async function loadSuggestions() {
+      const list = document.getElementById('suggestionsList');
+      const count = document.getElementById('suggestionsCount');
+
+      if (!list || !count) return;
+
+      list.innerHTML = '<div class="empty">جارٍ تحميل الاقتراحات...</div>';
+
+      const { data, error } = await db
+        .from('nasheed_suggestions')
+        .select('id, title, author_name, category, content, created_at')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('خطأ تحميل الاقتراحات:', error);
+
+        count.textContent = 'تعذّر التحميل';
+        list.innerHTML = `
+          <div class="empty">
+            تعذّر تحميل الاقتراحات.
+            <p class="muted">${escapeHtml(error.message || '')}</p>
+          </div>
+        `;
+        return;
+      }
+
+      count.textContent = `${data.length} اقتراح قيد المراجعة`;
+
+      if (!data.length) {
+        list.innerHTML = `
+          <div class="empty">
+            لا توجد اقتراحات جديدة حاليًا.
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = data.map(item => `
+        <article class="card suggestion-item"
+          style="margin-top:14px;padding:20px">
+
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <h3>${escapeHtml(item.title)}</h3>
+            <span class="badge">قيد المراجعة</span>
+          </div>
+
+          <p class="muted">
+            ${item.author_name
+              ? 'الشاعر: ' + escapeHtml(item.author_name)
+              : 'لم يُذكر اسم الشاعر'}
+            ${item.category
+              ? ' · التصنيف: ' + escapeHtml(item.category)
+              : ''}
+          </p>
+
+          <p class="muted">
+            تاريخ الاقتراح:
+            ${new Date(item.created_at).toLocaleString('ar')}
+          </p>
+
+          <details style="margin:14px 0">
+            <summary style="cursor:pointer;font-weight:700;color:var(--g)">
+              عرض كلمات الأنشودة
+            </summary>
+            <div class="lyrics" style="margin-top:12px;white-space:pre-wrap;line-height:2">
+              ${escapeHtml(item.content)}
+            </div>
+          </details>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button
+              class="btn"
+              type="button"
+              data-suggestion-action="approved"
+              data-id="${item.id}">
+              اعتماد ونشر
+            </button>
+
+            <button
+              class="btn light"
+              type="button"
+              data-suggestion-action="rejected"
+              data-id="${item.id}">
+              رفض الاقتراح
+            </button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // تنفيذ أزرار الاعتماد والرفض
+    function setupSuggestionActions() {
+      const list = document.getElementById('suggestionsList');
+      if (!list) return;
+
+      list.addEventListener('click', async e => {
+        const button = e.target.closest('[data-suggestion-action]');
+        if (!button) return;
+
+        if (button.disabled) return;
+
+        const suggestionId = button.dataset.id;
+        const decision = button.dataset.suggestionAction;
+
+        let reviewNote = null;
+
+        try {
+          const { error } = await db.rpc('review_nasheed_suggestion', {
+            p_suggestion_id: suggestionId,
+            p_decision: decision,
+            p_review_note: reviewNote
+          });
+
+          if (error) throw error;
+
+          toast(
+            decision === 'approved'
+              ? 'تم اعتماد الأنشودة ونشرها في الفهرس.'
+              : 'تم رفض الاقتراح.'
+          );
+
+          await loadSuggestions();
+
+        } catch (error) {
+          console.error('خطأ مراجعة الاقتراح:', error);
+
+          toast(
+            'تعذّرت مراجعة الاقتراح: ' +
+            (error?.message || 'خطأ غير معروف'),
+            true
+          );
+
+          button.disabled = false;
+        }
+      });
+    }
+
+    // تحميل الأنشودة الحالية للغرفة
     async function loadActive() {
       const { data, error } = await db
         .from('active_selections')
@@ -311,7 +461,6 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
         .maybeSingle();
 
       const el = document.getElementById('active');
-
       if (!el) return;
 
       if (error) {
@@ -365,36 +514,43 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           await loadActive();
         } catch (error) {
           console.error('خطأ إلغاء الاختيار:', error);
+
           toast(
             'تعذّر إلغاء الاختيار: ' +
             (error?.message || 'خطأ غير معروف'),
             true
           );
+
           button.disabled = false;
         }
       };
     }
 
     setupAddForm();
-    await loadActive();
+    await loadSuggestions();
+    setupSuggestionActions();
 
-    const channel = db
-      .channel('admin-active-' + roomId)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'active_selections',
-          filter: 'room_id=eq.' + roomId
-        },
-        () => loadActive()
-      )
-      .subscribe();
+    if (roomId) {
+      await loadActive();
 
-    window.addEventListener('beforeunload', () => {
-      db.removeChannel(channel);
-    });
+      const channel = db
+        .channel('admin-active-' + roomId)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'active_selections',
+            filter: 'room_id=eq.' + roomId
+          },
+          () => loadActive()
+        )
+        .subscribe();
+
+      window.addEventListener('beforeunload', () => {
+        db.removeChannel(channel);
+      });
+    }
 
   } catch (error) {
     console.error('خطأ لوحة المدير:', error);
@@ -413,5 +569,6 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
   }
 })();
 </script>
+
 </body>
-</html>
+</html> 

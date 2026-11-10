@@ -114,15 +114,26 @@ function commonHeader(title, account) {
         }
 
       <div class="top-actions">
+
+      <button type="button" class="btn light theme-toggle"
+        data-theme-toggle>
+  🌙 الوضع الليلي
+</button>
         
 
         <a class="btn light" href="rooms.html">
           🏠 الغرف
         </a>
 
-        <a class="btn light" href="library.html">
+                <a class="btn light" href="library.html">
           📚 فهرس الأناشيد العام
         </a>
+
+        ${
+          loggedIn && account.role === "admin"
+            ? `<a class="btn light" href="admin.html">⚙️ لوحة المدير</a>`
+            : ''
+        }
 
         ${
           loggedIn
@@ -291,12 +302,41 @@ function styles() {
     letter-spacing: 1px;
   }
 
-  .top-actions {
+    .top-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
     flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  .top-actions .btn {
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  @media (max-width: 700px) {
+    .top-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+      gap: 8px;
+    }
+
+    .top-actions .btn {
+      width: 100%;
+      min-width: 0;
+      padding: 9px 7px;
+      font-size: 13px;
+      white-space: normal;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .top-actions {
+      grid-template-columns: 1fr;
+    }
   }
 
   .top-actions > span {
@@ -646,6 +686,300 @@ function styles() {
       transition-duration: .01ms !important;
     }
   }
+  
+  /* ===== NADA PROFESSIONAL DARK MODE ===== */
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --g: #56b99a;
+  --g2: #e0eee6;
+  --g3: #2e8f70;
+  --iv: #0d1513;
+  --paper: #17221e;
+  --au: #b99a5b;
+  --au2: #ddc58d;
+  --tx: #e7eee9;
+  --mu: #a5b2aa;
+  --bd: #34483e;
+  --success: #6ac49a;
+  --danger: #e18b82;
+  --shadow: 0 16px 42px rgba(0,0,0,.28);
+  --shadow-hover: 0 22px 52px rgba(0,0,0,.4);
+}
+
+html[data-theme="dark"] body {
+  color: var(--tx);
+  background-color: #0d1513;
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(37,105,79,.23), transparent 58%),
+    radial-gradient(ellipse at 0% 100%, rgba(185,154,91,.055), transparent 45%);
+}
+
+html[data-theme="dark"] body::before {
+  opacity: .075;
+}
+
+html[data-theme="dark"] .top {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(67,145,111,.22), transparent 65%),
+    linear-gradient(120deg, #071b16, #0b3025 52%, #0d3b2d);
+  border-bottom-color: #9c8049;
+  box-shadow: 0 12px 34px rgba(0,0,0,.3);
+}
+
+html[data-theme="dark"] .brand,
+html[data-theme="dark"] .top-actions > span {
+  color: #f1f4ed;
+}
+
+html[data-theme="dark"] .brand small {
+  color: #d8c18b;
+}
+
+html[data-theme="dark"] .wrap {
+  color: var(--tx);
+}
+
+html[data-theme="dark"] .page-title {
+  color: var(--tx);
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(185,154,91,.09), transparent 65%),
+    linear-gradient(145deg, #1b2b24, #142019);
+  border-color: #806c43;
+  box-shadow: 0 14px 38px rgba(0,0,0,.24);
+}
+
+html[data-theme="dark"] .page-title::before {
+  border-color: rgba(185,154,91,.35);
+}
+
+html[data-theme="dark"] .page-title h1,
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] label {
+  color: #e7d5a7;
+}
+
+html[data-theme="dark"] .eyebrow {
+  color: #c5a96c;
+}
+
+html[data-theme="dark"] .card {
+  color: var(--tx);
+  background:
+    radial-gradient(ellipse at 0% 100%, rgba(185,154,91,.045), transparent 55%),
+    linear-gradient(145deg, #1d2b24, #16221c);
+  border-color: #52664f;
+  box-shadow: 0 10px 28px rgba(0,0,0,.2);
+}
+
+html[data-theme="dark"] .card::before {
+  border-color: rgba(185,154,91,.2);
+}
+
+html[data-theme="dark"] .card::after {
+  color: rgba(205,177,116,.55);
+}
+
+html[data-theme="dark"] .card:hover {
+  border-color: #a68b55;
+  box-shadow: 0 18px 42px rgba(0,0,0,.32);
+}
+
+html[data-theme="dark"] .muted,
+html[data-theme="dark"] small {
+  color: var(--mu);
+}
+
+html[data-theme="dark"] .btn {
+  color: #f4f4eb;
+  background: linear-gradient(135deg, #17634b, #0b392c);
+  border-color: #8e784b;
+  box-shadow: 0 5px 16px rgba(0,0,0,.2);
+}
+
+html[data-theme="dark"] .btn:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #21805f, #104b38);
+  box-shadow: 0 8px 22px rgba(0,0,0,.3);
+}
+
+html[data-theme="dark"] .btn.light {
+  color: #e8d8ad;
+  background: #1d3027;
+  border-color: #66583b;
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .btn.light:hover {
+  color: #fff0c8;
+  background: #294438;
+  border-color: #a68b55;
+}
+
+html[data-theme="dark"] .btn.danger {
+  color: #ffe9e6;
+  background: #702f2d;
+  border-color: #a45d55;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  color: #e8eee9;
+  background: #111d18;
+  border-color: #465b4d;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.16);
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] select:focus {
+  border-color: #72b99a;
+  box-shadow: 0 0 0 3px rgba(86,185,154,.14);
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #83958a;
+}
+
+html[data-theme="dark"] select option {
+  color: #e8eee9;
+  background: #17231d;
+}
+
+html[data-theme="dark"] .lyrics {
+  color: #e9eee7;
+  background-color: #18251e;
+  background-image: repeating-linear-gradient(
+    0deg, transparent 0 37px, rgba(185,154,91,.09) 37px 38px
+  );
+  border-color: #9b804b;
+  outline-color: rgba(185,154,91,.2);
+}
+
+html[data-theme="dark"] .empty {
+  color: var(--mu);
+  background: #17231d;
+  border-color: #66583b;
+}
+
+html[data-theme="dark"] .badge {
+  color: #cce8d9;
+  background: #203c30;
+  border-color: #426b55;
+}
+
+html[data-theme="dark"] a {
+  color: #d8bd7c;
+}
+
+html[data-theme="dark"] a:hover {
+  color: #f0d99f;
+}
+
+html[data-theme="dark"] table {
+  color: var(--tx);
+  border-color: #3c5145;
+}
+
+html[data-theme="dark"] th {
+  color: #e7d5a7;
+  background: #20372b;
+}
+
+html[data-theme="dark"] td,
+html[data-theme="dark"] tr {
+  border-color: #34483e;
+}
+
+html[data-theme="dark"] hr {
+  border-color: #3b5044;
+}
+
+html[data-theme="dark"] .toast {
+  color: #f5f3e9;
+  background: #173b2d;
+  border-color: #9b804b;
+}
+
+html[data-theme="dark"] .toast.error {
+  color: #fff0ed;
+  background: #702f2d;
+  border-color: #a45d55;
+}
+
+html[data-theme="dark"] ::selection {
+  color: #fff;
+  background: #286b50;
+}
+
+html[data-theme="dark"] :focus-visible {
+  outline-color: #c9aa69;
+}
+
   </style>`;
 
+  
+  
+}
+
+
+/* ===== NADA THEME CONTROLLER ===== */
+
+function initNADATheme() {
+  let savedTheme = "light";
+
+  try {
+    savedTheme = localStorage.getItem("nada-theme") || "light";
+  } catch (error) {
+    console.warn("Theme storage unavailable:", error);
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+
+    document.querySelectorAll("[data-theme-toggle]").forEach(button => {
+      button.textContent =
+        theme === "dark"
+          ? "☀️ الوضع النهاري"
+          : "🌙 الوضع الليلي";
+    });
+  }
+
+  applyTheme(savedTheme);
+
+  if (document.documentElement.dataset.themeHandlerBound !== "true") {
+    document.addEventListener("click", function(event) {
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      const button = target.closest("[data-theme-toggle]");
+
+      if (!button) return;
+
+      const currentTheme = document.documentElement.dataset.theme;
+      const nextTheme = currentTheme === "dark" ? "light" : "dark";
+
+      try {
+        localStorage.setItem("nada-theme", nextTheme);
+      } catch (error) {
+        console.warn("Could not save theme:", error);
+      }
+
+      applyTheme(nextTheme);
+    });
+
+    document.documentElement.dataset.themeHandlerBound = "true";
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initNADATheme);
+} else {
+  initNADATheme();
 }

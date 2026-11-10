@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="shared.js"></script>
+
   <style>
     .library-tools {
       display: grid;
@@ -23,6 +24,53 @@
       border: 1px solid #d8dfd7;
       border-radius: 10px;
       font: inherit;
+    }
+
+    .maqam-filter {
+      position: relative;
+      width: 100%;
+    }
+
+    .maqam-filter > button {
+      width: 100%;
+      padding: 12px;
+      text-align: right;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .maqam-menu {
+      margin-top: 8px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #d8dfd7;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .maqam-menu[hidden] {
+      display: none;
+    }
+
+    .maqam-menu button {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      border: 0;
+      background: transparent;
+      text-align: right;
+      font: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .maqam-menu button:hover,
+    .maqam-menu button.active {
+      background: #e7f1eb;
+      color: #0b5d4b;
+      font-weight: 800;
     }
 
     .pagination {
@@ -51,93 +99,387 @@
       font-size: 14px;
       margin: 8px 0;
     }
+
+    /* نموذج اقتراح الأنشودة */
+    .suggestion-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .suggestion-form input,
+    .suggestion-form textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      font: inherit;
+    }
+
+    .suggestion-form textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    .suggestion-form label {
+      font-weight: 700;
+      margin-top: 5px;
+    }
+
+    .suggestion-form button:disabled {
+      opacity: .6;
+      cursor: wait;
+      transform: none;
+    }
   </style>
-<style id="nada-geometric-heritage">
 
-/* NADA Geometric Heritage — visual layer only */
-:root{
-  --g:#0b5d4b;--g2:#08463a;--iv:#fbf8ef;--au:#b8975a;
-  --tx:#1d2b27;--mu:#64756f;--bd:#e6dfcc;
-  --surface:rgba(255,255,255,.88);--shadow:0 14px 40px rgba(8,70,58,.09);
-  --shadow-hover:0 20px 48px rgba(8,70,58,.15);--radius:22px;
-}
-html{scroll-behavior:smooth}
-body{
-  background:
-    radial-gradient(ellipse at 0% 0%,rgba(184,151,90,.10),transparent 32rem),
-    radial-gradient(ellipse at 100% 10%,rgba(11,93,75,.09),transparent 34rem),
-    var(--iv)!important;
-  color:var(--tx);font-family:"Cairo",Tahoma,Arial,sans-serif;
-}
-body:before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.20;
-  background-image:url("data:image/svg+xml,%3Csvg width='96' height='96' viewBox='0 0 96 96' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b8975a' stroke-opacity='.30' stroke-width='.7'%3E%3Cpath d='M48 3 61 16 80 16 80 35 93 48 80 61 80 80 61 80 48 93 35 80 16 80 16 61 3 48 16 35 16 16 35 16Z'/%3E%3Cpath d='M48 18 59 29 67 29 67 37 78 48 67 59 67 67 59 67 48 78 37 67 29 67 29 59 18 48 29 37 29 29 37 29Z'/%3E%3C/g%3E%3C/svg%3E");
-}
-.top, .topbar{
-  background:linear-gradient(115deg,#073e33 0%,#0b5d4b 58%,#124f40 100%)!important;
-  color:#fff!important;border:0!important;box-shadow:0 8px 30px rgba(8,70,58,.14);
-  position:relative;
-}
-.top:after,.topbar:after{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;
-  background-image:repeating-linear-gradient(45deg,transparent 0 22px,rgba(255,255,255,.2) 23px,transparent 24px 46px);
-}
-.brand,.brand b,.topbar .brand{color:#fff!important;position:relative;z-index:1}
-.brand small{color:#e7d4a5!important}
-.top-actions,.top-link{position:relative;z-index:1}
-.top-actions>span{color:#f7f2e6}
-.wrap{max-width:1180px!important;margin:34px auto!important;padding-left:22px!important;padding-right:22px!important}
-.page-title{margin-bottom:26px!important}
-h1{letter-spacing:-.035em;color:var(--g)}
-h2,h3{letter-spacing:-.02em}
-.eyebrow{letter-spacing:.02em}
-.card,.action-card{
-  background:var(--surface)!important;border:1px solid rgba(184,151,90,.25)!important;
-  border-radius:var(--radius)!important;box-shadow:var(--shadow)!important;
-  backdrop-filter:blur(10px);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
-  position:relative;overflow:hidden;
-}
-.card:before,.action-card:before{
-  content:"";position:absolute;top:0;right:22px;width:54px;height:3px;
-  background:linear-gradient(90deg,var(--au),#e4d4a8);border-radius:0 0 8px 8px;opacity:.8;
-}
-.card:hover,.action-card:hover{box-shadow:var(--shadow-hover)!important;border-color:rgba(184,151,90,.48)!important}
-.grid{gap:18px!important}
-.btn,.btn-light,.top-link,button{
-  border-radius:13px;transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
-}
-.btn{
-  background:linear-gradient(135deg,var(--g),var(--g2))!important;color:#fff!important;
-  box-shadow:0 5px 13px rgba(11,93,75,.14);font-weight:700;
-}
-.btn:hover,button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(11,93,75,.16)}
-.btn.light,.btn-light{
-  background:rgba(255,255,255,.82)!important;color:var(--g)!important;
-  border:1px solid rgba(184,151,90,.38)!important;box-shadow:none;
-}
-.btn.light:hover,.btn-light:hover{background:#f3eee0!important}
-input,textarea,select{
-  border:1px solid #ded7c5!important;border-radius:13px!important;background:rgba(255,255,255,.92)!important;
-  color:var(--tx)!important;outline:none;transition:border-color .18s,box-shadow .18s;
-}
-input:focus,textarea:focus,select:focus{border-color:var(--g)!important;box-shadow:0 0 0 4px rgba(11,93,75,.09)}
-.badge,.room-status{background:#e7f1eb!important;color:#0b5d4b!important;border:1px solid #d1e4d8}
-.empty{background:rgba(255,255,255,.76)!important;border:1px dashed rgba(184,151,90,.6)!important;border-radius:18px!important}
-.lyrics{background:rgba(255,255,255,.88)!important;border:1px solid rgba(184,151,90,.28)!important;border-radius:22px!important;box-shadow:var(--shadow);padding:clamp(20px,4vw,34px)!important}
-.toast{box-shadow:0 12px 32px rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.25)}
-a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3px}
-::selection{background:#d9e9df;color:#08463a}
-@media(max-width:700px){
-  .wrap{margin:22px auto!important;padding-left:14px!important;padding-right:14px!important}
-  .top,.topbar{padding:14px 16px!important}
-  .top-actions{gap:8px!important}
-  .top-actions .btn,.top-actions .top-link{font-size:.88rem;padding:8px 11px}
-  .card,.action-card{border-radius:18px!important;padding:17px!important}
-  .page-title{gap:10px}
-}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+  <style id="nada-geometric-heritage">
+    :root{
+      --g:#0b5d4b;--g2:#08463a;--iv:#fbf8ef;--au:#b8975a;
+      --tx:#1d2b27;--mu:#64756f;--bd:#e6dfcc;
+      --surface:rgba(255,255,255,.88);--shadow:0 14px 40px rgba(8,70,58,.09);
+      --shadow-hover:0 20px 48px rgba(8,70,58,.15);--radius:22px;
+    }
 
-</style>
+    html{scroll-behavior:smooth}
+
+    body{
+      background:
+        radial-gradient(ellipse at 0% 0%,rgba(184,151,90,.10),transparent 32rem),
+        radial-gradient(ellipse at 100% 10%,rgba(11,93,75,.09),transparent 34rem),
+        var(--iv)!important;
+      color:var(--tx);font-family:"Cairo",Tahoma,Arial,sans-serif;
+    }
+
+    body:before{
+      content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.20;
+      background-image:url("data:image/svg+xml,%3Csvg width='96' height='96' viewBox='0 0 96 96' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b8975a' stroke-opacity='.30' stroke-width='.7'%3E%3Cpath d='M48 3 61 16 80 16 80 35 93 48 80 61 80 80 61 80 48 93 35 80 16 80 16 61 3 48 16 35 16 16 35 16Z'/%3E%3Cpath d='M48 18 59 29 67 29 67 37 78 48 67 59 67 67 59 67 48 78 37 67 29 67 29 59 18 48 29 37 29 29 37 29Z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .top, .topbar{
+      background:linear-gradient(115deg,#073e33 0%,#0b5d4b 58%,#124f40 100%)!important;
+      color:#fff!important;border:0!important;box-shadow:0 8px 30px rgba(8,70,58,.14);
+      position:relative;
+    }
+
+    .top:after,.topbar:after{
+      content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;
+      background-image:repeating-linear-gradient(45deg,transparent 0 22px,rgba(255,255,255,.2) 23px,transparent 24px 46px);
+    }
+
+    .brand,.brand b,.topbar .brand{color:#fff!important;position:relative;z-index:1}
+    .brand small{color:#e7d4a5!important}
+    .top-actions,.top-link{position:relative;z-index:1}
+    .top-actions>span{color:#f7f2e6}
+
+    .wrap{max-width:1180px!important;margin:34px auto!important;padding-left:22px!important;padding-right:22px!important}
+    .page-title{margin-bottom:26px!important}
+    h1{letter-spacing:-.035em;color:var(--g)}
+    h2,h3{letter-spacing:-.02em}
+    .eyebrow{letter-spacing:.02em}
+
+    .card,.action-card{
+      background:var(--surface)!important;border:1px solid rgba(184,151,90,.25)!important;
+      border-radius:var(--radius)!important;box-shadow:var(--shadow)!important;
+      backdrop-filter:blur(10px);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+      position:relative;overflow:hidden;
+    }
+
+    .card:before,.action-card:before{
+      content:"";position:absolute;top:0;right:22px;width:54px;height:3px;
+      background:linear-gradient(90deg,var(--au),#e4d4a8);border-radius:0 0 8px 8px;opacity:.8;
+    }
+
+    .card:hover,.action-card:hover{box-shadow:var(--shadow-hover)!important;border-color:rgba(184,151,90,.48)!important}
+    .grid{gap:18px!important}
+
+    .btn,.btn-light,.top-link,button{
+      border-radius:13px;transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+    }
+
+    .btn{
+      background:linear-gradient(135deg,var(--g),var(--g2))!important;color:#fff!important;
+      box-shadow:0 5px 13px rgba(11,93,75,.14);font-weight:700;
+    }
+
+    .btn:hover,button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(11,93,75,.16)}
+
+    .btn.light,.btn-light{
+      background:rgba(255,255,255,.82)!important;color:var(--g)!important;
+      border:1px solid rgba(184,151,90,.38)!important;box-shadow:none;
+    }
+
+    .btn.light:hover,.btn-light:hover{background:#f3eee0!important}
+
+    input,textarea,select{
+      border:1px solid #ded7c5!important;border-radius:13px!important;background:rgba(255,255,255,.92)!important;
+      color:var(--tx)!important;outline:none;transition:border-color .18s,box-shadow .18s;
+    }
+
+    input:focus,textarea:focus,select:focus{border-color:var(--g)!important;box-shadow:0 0 0 4px rgba(11,93,75,.09)}
+    .badge,.room-status{background:#e7f1eb!important;color:#0b5d4b!important;border:1px solid #d1e4d8}
+    .empty{background:rgba(255,255,255,.76)!important;border:1px dashed rgba(184,151,90,.6)!important;border-radius:18px!important}
+    .lyrics{background:rgba(255,255,255,.88)!important;border:1px solid rgba(184,151,90,.28)!important;border-radius:22px!important;box-shadow:var(--shadow);padding:clamp(20px,4vw,34px)!important}
+    .toast{box-shadow:0 12px 32px rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.25)}
+    a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3px}
+    ::selection{background:#d9e9df;color:#08463a}
+
+    @media(max-width:700px){
+      .wrap{margin:22px auto!important;padding-left:14px!important;padding-right:14px!important}
+      .top,.topbar{padding:14px 16px!important}
+      .top-actions{gap:8px!important}
+      .top-actions .btn,.top-actions .top-link{font-size:.88rem;padding:8px 11px}
+      .card,.action-card{border-radius:18px!important;padding:17px!important}
+      .page-title{gap:10px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+    }
+
+    /* NADA - PROFESSIONAL LIBRARY ICONS */
+
+    .nada-section-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .nada-heading-icon {
+      width: 54px;
+      height: 54px;
+      flex: 0 0 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 17px;
+      border: 1px solid #c5dbc9;
+      color: #167653;
+      background: linear-gradient(145deg,#e5f3e8,#c8e5d2);
+      transition: .25s ease;
+    }
+
+    .nada-heading-icon svg,
+    .nas heed-icon svg {
+      width: 27px;
+      height: 27px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nada-heading-icon.gold {
+      color: #9b7736;
+      background: linear-gradient(145deg,#f8efd8,#e9d7ac);
+      border-color: #d9c28d;
+    }
+
+    .nada-heading-icon:hover {
+      transform: translateY(-3px);
+    }
+
+    .nas heed-icon {
+      display: none;
+    }
+
+    .nasheed-card {
+      position: relative;
+    }
+
+    .nasheed-card-heading {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin: 15px 0;
+    }
+
+    .nasheed-icon {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #167653;
+      background: linear-gradient(145deg,#e5f3e8,#c8e5d2);
+      border: 1px solid #c5dbc9;
+      border-radius: 15px;
+    }
+
+    .nasheed-icon svg {
+      width: 25px;
+      height: 25px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    html[data-theme="dark"] .nada-heading-icon {
+      color: #83e0b2;
+      background: linear-gradient(145deg,#194c38,#235d43);
+      border-color: #39835e;
+      box-shadow: 0 0 22px rgba(89,207,146,.10);
+    }
+
+    html[data-theme="dark"] .nada-heading-icon.gold {
+      color: #f0cd7d;
+      background: linear-gradient(145deg,#493b22,#5b4928);
+      border-color: #917342;
+      box-shadow: 0 0 22px rgba(231,192,104,.10);
+    }
+
+    html[data-theme="dark"] .nasheed-icon {
+      color: #83d9a9;
+      background: linear-gradient(145deg,#193e2d,#24543a);
+      border-color: #477c58;
+      box-shadow: 0 0 18px rgba(89,207,146,.09);
+    }
+
+    html[data-theme="dark"] .nasheed-card:hover .nasheed-icon {
+      color: #b0f0ca;
+      box-shadow: 0 0 24px rgba(89,207,146,.2);
+    }
+
+    html[data-theme="dark"] .nasheed-card h2 {
+      color: #e7d5a7;
+    }
+
+    html[data-theme="dark"] .library-tools {
+      background: linear-gradient(145deg,#1d2b24,#142019) !important;
+      border-color: #52664f !important;
+    }
+
+    html[data-theme="dark"] .library-tools label {
+      color: #d9c58f;
+    }
+
+    html[data-theme="dark"] .maqam-menu {
+      background: #17251e;
+      border-color: #52664f;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+
+    html[data-theme="dark"] .maqam-menu button {
+      color: #dce9df;
+    }
+
+    html[data-theme="dark"] .maqam-menu button:hover,
+    html[data-theme="dark"] .maqam-menu button.active {
+      background: #294737;
+      color: #a7e2bd;
+    }
+
+    html[data-theme="dark"] .page-info {
+      color: #a5b8aa;
+    }
+
+    html[data-theme="dark"] .pagination .current-page {
+      background: linear-gradient(135deg,#267653,#10513b);
+      border-color: #75b58a;
+    }
+
+    html[data-theme="dark"] .pagination button.light {
+      background: #1c3025 !important;
+      color: #d7e7db !important;
+      border-color: #526b58 !important;
+    }
+
+    html[data-theme="dark"] .nasheed-card .btn.light {
+      background: #203b2c !important;
+      color: #b9e4c8 !important;
+      border-color: #52785b !important;
+    }
+
+    html[data-theme="dark"] .nasheed-card .btn.light:hover {
+      background: #2b5039 !important;
+      color: #fff !important;
+    }
+
+    @media(max-width:500px) {
+      .nada-heading-icon {
+        width: 47px;
+        height: 47px;
+        flex-basis: 47px;
+        border-radius: 14px;
+      }
+
+      .nasheed-icon {
+        width: 43px;
+        height: 43px;
+        flex-basis: 43px;
+      }
+    }
+
+    html[data-theme="dark"] .card,
+    html[data-theme="dark"] .library-tools {
+      background: #172a22 !important;
+      border-color: #405b49 !important;
+      color: #e7e9df !important;
+    }
+
+    html[data-theme="dark"] input,
+    html[data-theme="dark"] textarea,
+    html[data-theme="dark"] select,
+    html[data-theme="dark"] .maqam-filter {
+      background: #263a30 !important;
+      color: #e8e9df !important;
+      border: 1px solid #526c58 !important;
+    }
+
+    html[data-theme="dark"] input::placeholder,
+    html[data-theme="dark"] textarea::placeholder {
+      color: #a5b5a8 !important;
+    }
+
+    html[data-theme="dark"] .nasheed-card h2,
+    html[data-theme="dark"] .card h2 {
+      color: #d9c18b !important;
+    }
+
+    html[data-theme="dark"] .card .muted,
+    html[data-theme="dark"] .library-tools .muted {
+      color: #aab9ac !important;
+    }
+
+    html[data-theme="dark"] .maqam-menu {
+      background: #1c3026 !important;
+      border-color: #526c58 !important;
+      color: #e8e9df !important;
+    }
+
+    html[data-theme="dark"] select option {
+      background: #1c3026;
+      color: #e8e9df;
+    }
+
+    html[data-theme="dark"] #maqamToggle {
+      background: #263a30 !important;
+      color: #e8e9df !important;
+      border: 1px solid #526c58 !important;
+      box-shadow: none !important;
+    }
+
+    html[data-theme="dark"] #maqamToggle:hover {
+      background: #304a3a !important;
+      color: #ffffff !important;
+    }
+
+    html[data-theme="dark"] #app .empty {
+      background: #172a22 !important;
+      background-color: #172a22 !important;
+      color: #e7e9df !important;
+      border: 1px dashed #526b58 !important;
+      border-radius: 18px !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+    }
+
+    html[data-theme="dark"] #app .empty .btn {
+      color: #ffffff !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -150,31 +492,42 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
     try {
       let ctx = null;
 
-    const { data: { session } } = await db.auth.getSession();
+      const { data: { session } } = await db.auth.getSession();
 
-    if (session) {
-      ctx = await requireSession();
+      if (session) {
+        ctx = await requireSession();
       }
 
-    const room = ctx ? selectedRoomId() : null;
-    const isAdmin = ctx?.account?.role === 'admin';
-    const canSelect =
-        !!ctx &&
-      (ctx.account.role === 'admin' ||
-   ctx.account.role === 'leader');
+      const room = ctx ? selectedRoomId() : null;
+      const isAdmin = ctx?.account?.role === 'admin';
 
-      const PAGE_SIZE = 50;
+      const canSelect =
+        !!ctx &&
+        (ctx.account.role === 'admin' ||
+         ctx.account.role === 'leader');
+
+      const PAGE_SIZE = 25;
 
       let currentPage = 0;
       let totalCount = 0;
       let searchTimer = null;
       let requestNumber = 0;
+      let selectedCategory = null;
 
       app.innerHTML = styles() +
         commonHeader('فهرس الأناشيد العام', ctx?.account || null) + `
+
         ${isAdmin ? `
           <section class="card" style="margin-bottom:20px">
-            <h2>إضافة أنشودة جديدة</h2>
+            <div class="nada-section-heading">
+              <div class="nada-heading-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 5v14M5 12h14"/>
+                  <circle cx="12" cy="12" r="9"/>
+                </svg>
+              </div>
+              <h2>إضافة أنشودة جديدة</h2>
+            </div>
 
             <p class="muted">
               أضف أنشودة إلى الفهرس العام لتكون متاحة للجميع.
@@ -189,11 +542,18 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
                 required
               >
 
-              <label for="newCategory">المقام</label>
+              <label for="newCategory">التصنيف</label>
               <input
                 id="newCategory"
                 maxlength="150"
-                placeholder="مثلاً: البياتي أو الحجاز أو الصبا"
+                placeholder="مثلاً: بيات، حضرة، البردة، الهمزية"
+              >
+
+              <label for="newPoet">اسم الكاتب</label>
+              <input
+                id="newPoet"
+                maxlength="200"
+                placeholder="اكتب اسم الكاتب (اختياري)"
               >
 
               <label for="newContent">كلمات الأنشودة</label>
@@ -211,8 +571,77 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           </section>
         ` : ''}
 
+        ${ctx ? `
+          <section class="card" style="margin-bottom:20px">
+            <div class="nada-section-heading">
+              <div class="nada-heading-icon gold">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 5v14M5 12h14"/>
+                  <circle cx="12" cy="12" r="9"/>
+                </svg>
+              </div>
+              <h2>اقترح أنشودة</h2>
+            </div>
+
+            <p class="muted">
+              شاركنا أنشودة جديدة، وستصل إلى الإدارة لمراجعتها قبل إضافتها إلى الفهرس العام.
+            </p>
+
+            <form id="suggestNasheedForm" class="suggestion-form">
+              <label for="suggestTitle">عنوان الأنشودة</label>
+              <input
+                id="suggestTitle"
+                maxlength="250"
+                placeholder="اكتب عنوان الأنشودة"
+                required
+              >
+
+              <label for="suggestCategory">التصنيف</label>
+              <input
+                id="suggestCategory"
+                maxlength="150"
+                placeholder="مثلاً: بيات، حضرة، البردة"
+              >
+
+              <label for="suggestAuthor">اسم الكاتب</label>
+              <input
+                id="suggestAuthor"
+                maxlength="200"
+                placeholder="اسم الكاتب (اختياري)"
+              >
+
+              <label for="suggestContent">كلمات الأنشودة</label>
+              <textarea
+                id="suggestContent"
+                rows="8"
+                maxlength="20000"
+                placeholder="اكتب كلمات الأنشودة هنا..."
+                required
+              ></textarea>
+
+              <button
+                class="btn"
+                id="suggestNasheedBtn"
+                type="submit"
+              >
+                إرسال الاقتراح للمراجعة
+              </button>
+            </form>
+          </section>
+        ` : ''}
+
         <section class="card library-tools">
-          <h2>فهرس الأناشيد</h2>
+          <div class="nada-section-heading">
+            <div class="nada-heading-icon gold">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 5h16M4 12h16M4 19h16"/>
+                <circle cx="8" cy="5" r="1"/>
+                <circle cx="16" cy="12" r="1"/>
+                <circle cx="10" cy="19" r="1"/>
+              </svg>
+            </div>
+            <h2>فهرس الأناشيد</h2>
+          </div>
 
           ${room ? `
             <p class="muted" id="roomName">
@@ -225,12 +654,31 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
             </p>
           `}
 
+          <label>التصنيفات</label>
+
+          <div class="maqam-filter">
+            <button
+              type="button"
+              id="maqamToggle"
+              class="btn light"
+              aria-expanded="false"
+            >
+              التصنيفات: <span id="maqamSelected">كل التصنيفات</span>
+            </button>
+
+            <div id="maqamMenu" class="maqam-menu" hidden>
+              <button type="button" data-category="" class="active">
+                كل التصنيفات
+              </button>
+            </div>
+          </div>
+
           <label for="q">البحث في الأناشيد</label>
 
           <input
             id="q"
             type="search"
-            placeholder="ابحث بعنوان الأنشودة أو مقامها..."
+            placeholder="ابحث بعنوان الأنشودة أو تصنيفها..."
             autocomplete="off"
           >
 
@@ -255,6 +703,88 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
       const count = document.getElementById('count');
       const pagination = document.getElementById('pagination');
       const pageInfo = document.getElementById('pageInfo');
+
+      const maqamToggle = document.getElementById('maqamToggle');
+      const maqamMenu = document.getElementById('maqamMenu');
+      const maqamSelected = document.getElementById('maqamSelected');
+
+      // تحميل التصنيفات تلقائيًا من قاعدة البيانات
+      async function loadMaqamat() {
+        const { data, error } = await db
+          .from('anasheed')
+          .select('category')
+          .not('category', 'is', null)
+          .order('category', { ascending: true });
+
+        if (error) throw error;
+
+        const categories = [
+          ...new Set(
+            (data || [])
+              .map(item => item.category?.trim())
+              .filter(Boolean)
+          )
+        ];
+
+        maqamMenu.innerHTML = `
+          <button
+            type="button"
+            data-category=""
+            class="${selectedCategory ? '' : 'active'}"
+          >كل التصنيفات</button>
+
+          ${categories.map(category => `
+            <button
+              type="button"
+              data-category="${escapeHtml(category)}"
+              class="${selectedCategory === category ? 'active' : ''}"
+            >${escapeHtml(category)}</button>
+          `).join('')}
+        `;
+      }
+
+      // فتح وإغلاق قائمة التصنيف
+      maqamToggle.addEventListener('click', () => {
+        const isOpening = maqamMenu.hidden;
+
+        maqamMenu.hidden = !isOpening;
+        maqamToggle.setAttribute('aria-expanded', String(isOpening));
+      });
+
+      // اختيار التصنيف
+      maqamMenu.addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-category]');
+
+        if (!btn) return;
+
+        selectedCategory = btn.dataset.category || null;
+
+        maqamSelected.textContent =
+          selectedCategory || 'كل التصنيفات';
+
+        maqamMenu.querySelectorAll('button').forEach(item => {
+          item.classList.toggle('active', item === btn);
+        });
+
+        maqamMenu.hidden = true;
+        maqamToggle.setAttribute('aria-expanded', 'false');
+
+        currentPage = 0;
+
+        try {
+          await loadAnasheed();
+        } catch (err) {
+          showLoadError(err);
+        }
+      });
+
+      // إغلاق القائمة عند الضغط خارجها
+      document.addEventListener('click', e => {
+        if (!e.target.closest('.maqam-filter')) {
+          maqamMenu.hidden = true;
+          maqamToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
 
       // عرض اسم الغرفة المختارة
       if (room) {
@@ -289,6 +819,9 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
             const category =
               document.getElementById('newCategory').value.trim();
 
+            const poetName =
+              document.getElementById('newPoet').value.trim();
+
             const content =
               document.getElementById('newContent').value.trim();
 
@@ -306,6 +839,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
                 .insert({
                   title,
                   category: category || null,
+                  poet_name: poetName || null,
                   content
                 });
 
@@ -314,7 +848,10 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
               e.target.reset();
               searchInput.value = '';
               currentPage = 0;
+              selectedCategory = null;
+              maqamSelected.textContent = 'كل التصنيفات';
 
+              await loadMaqamat();
               await loadAnasheed();
 
               toast('تمت إضافة الأنشودة بنجاح');
@@ -332,6 +869,69 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
             } finally {
               btn.disabled = false;
               btn.textContent = 'إضافة الأنشودة';
+            }
+          });
+      }
+
+      // إرسال اقتراح أنشودة - للمستخدمين المسجلين فقط
+      if (ctx) {
+        document
+          .getElementById('suggestNasheedForm')
+          .addEventListener('submit', async e => {
+            e.preventDefault();
+
+            const btn =
+              document.getElementById('suggestNasheedBtn');
+
+            const title =
+              document.getElementById('suggestTitle').value.trim();
+
+            const category =
+              document.getElementById('suggestCategory').value.trim();
+
+            const authorName =
+              document.getElementById('suggestAuthor').value.trim();
+
+            const content =
+              document.getElementById('suggestContent').value.trim();
+
+            if (!title || !content) {
+              toast('عنوان الأنشودة وكلماتها مطلوبان.', true);
+              return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'جارٍ إرسال الاقتراح...';
+
+            try {
+              const { error } = await db
+                .from('nasheed_suggestions')
+                .insert({
+                  title,
+                  category: category || null,
+                  author_name: authorName || null,
+                  content,
+                  submitted_by: ctx.account.id,
+                  status: 'pending'
+                });
+
+              if (error) throw error;
+
+              e.target.reset();
+
+              toast('تم إرسال اقتراحك بنجاح، وهو الآن قيد المراجعة.');
+
+            } catch (err) {
+              console.error('خطأ إرسال اقتراح الأنشودة:', err);
+
+              toast(
+                'تعذّر إرسال الاقتراح. قد تكون صلاحيات قاعدة البيانات غير مكتملة.',
+                true
+              );
+
+            } finally {
+              btn.disabled = false;
+              btn.textContent = 'إرسال الاقتراح للمراجعة';
             }
           });
       }
@@ -405,7 +1005,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           `الصفحة ${currentPage + 1} من ${pages}`;
       }
 
-      // تحميل 50 أنشودة فقط في كل مرة
+      // تحميل الأناشيد مع فلتر التصنيف والبحث
       async function loadAnasheed() {
         const myRequest = ++requestNumber;
 
@@ -419,7 +1019,8 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           {
             p_search: searchInput.value.trim() || null,
             p_offset: currentPage * PAGE_SIZE,
-            p_limit: PAGE_SIZE
+            p_limit: PAGE_SIZE,
+            p_category: selectedCategory || null
           }
         );
 
@@ -454,8 +1055,8 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
         if (!rows.length) {
           list.innerHTML = `
             <div class="empty">
-              ${searchInput.value.trim()
-                ? 'ما لقينا أناشيد مطابقة لبحثك.'
+              ${searchInput.value.trim() || selectedCategory
+                ? 'ما لقينا أناشيد مطابقة لاختياراتك.'
                 : 'لا توجد أناشيد مضافة حتى الآن.'}
             </div>
           `;
@@ -465,16 +1066,41 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
         }
 
         list.innerHTML = rows.map((n, i) => `
-          <article class="card">
+          <article class="card nasheed-card">
+
             <span class="muted">
               أنشودة ${currentPage * PAGE_SIZE + i + 1}
             </span>
 
-            <h2>${escapeHtml(n.title || 'بدون عنوان')}</h2>
+            <div class="nasheed-card-heading">
+              <span class="nasheed-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M9 18V5l12-2v13"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <circle cx="6" cy="18" r="3"
+                    stroke="currentColor" stroke-width="1.8"/>
+                  <circle cx="18" cy="16" r="3"
+                    stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </span>
+
+              <h2>${escapeHtml(n.title || 'بدون عنوان')}</h2>
+            </div>
 
             <p class="muted">
-              المقام: ${escapeHtml(n.category || 'غير محدد')}
+              التصنيف: ${escapeHtml(n.category || 'غير محدد')}
             </p>
+
+            ${n.poet_name ? `
+              <p class="muted">
+                ✍️ الكاتب: <strong>${escapeHtml(n.poet_name)}</strong>
+              </p>
+            ` : ''}
 
             <div
               style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"
@@ -492,6 +1118,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
                 >اعتماد للفرقة</button>
               ` : ''}
             </div>
+
           </article>
         `).join('');
 
@@ -609,6 +1236,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
             btn.textContent = 'جارٍ إعادة المحاولة...';
 
             try {
+              await loadMaqamat();
               await loadAnasheed();
             } catch (e) {
               showLoadError(e);
@@ -616,7 +1244,9 @@ a:focus-visible,button:focus-visible{outline:3px solid #d9bc7b;outline-offset:3p
           };
       }
 
+      // تحميل التصنيفات ثم الأناشيد عند فتح الصفحة
       try {
+        await loadMaqamat();
         await loadAnasheed();
       } catch (err) {
         showLoadError(err);
